@@ -95,33 +95,28 @@ GurobiInterface::set_param(ParamType type, T val)
 template <class LowerValType, class UpperValType>
 void
 GurobiInterface::Model::add_constraint(LowerValType lower_bound, Expression expr,
-                                       UpperValType upper_bound, std::string * name)
+                                       UpperValType upper_bound, std::string name)
 {
 	std::string lower_name = "";
 	std::string upper_name = "";
-	if (name != nullptr) {
-		lower_name = *name + std::string("_lower");
-		upper_name = *name + std::string("_upper");
+	if (name != "") {
+		lower_name = name + std::string("_lower");
+		upper_name = name + std::string("_upper");
 	}
 
-	add_lower_constraint(lower_bound, expr, &lower_name);
-	add_upper_constraint(upper_bound, expr, &upper_name);
+	add_lower_constraint(lower_bound, expr, lower_name);
+	add_upper_constraint(upper_bound, expr, upper_name);
 }
 
 template <class LowerValType, class UpperValType>
 GurobiInterface::Variable
-GurobiInterface::Model::add_var(VariableType type, std::string * name, LowerValType lower_bound,
-                               UpperValType upper_bound)
+GurobiInterface::Model::add_var(VariableType type, LowerValType lower_bound,
+                               UpperValType upper_bound, std::string name)
 {
 	double lower = grb_internal::get_value(lower_bound);
 	double upper = grb_internal::get_value(upper_bound);
 
-	std::string name_str = "";
-	if (name != nullptr) {
-		name_str = *name;
-	}
-
-	Variable var = this->m->addVar(lower, upper, 0, grb_internal::vtype_map(type), name_str);
+	Variable var = this->m->addVar(lower, upper, 0, grb_internal::vtype_map(type), name);
 
 	if (this->interface->auto_commit_variables) {
 		this->commit_variables();
@@ -192,21 +187,21 @@ GurobiInterface::create_model()
 template <class UpperValType>
 void
 GurobiInterface::Model::add_upper_constraint(std::enable_if_t<std::is_arithmetic<UpperValType>::value> upper_bound,
-                                             Expression expr, std::string * name)
+                                             Expression expr, std::string name)
 {
-	this->m->addConstr(upper_bound, GRB_GREATER_EQUAL, expr, *name);
+	this->m->addConstr(upper_bound, GRB_GREATER_EQUAL, expr, name);
 }
 
 void
 GurobiInterface::Model::add_upper_constraint(Expression upper_bound, Expression expr,
-                                             std::string * name)
+                                             std::string name)
 {
-	this->m->addConstr(upper_bound, GRB_GREATER_EQUAL, expr, *name);
+	this->m->addConstr(upper_bound, GRB_GREATER_EQUAL, expr, name);
 }
 
 void
 GurobiInterface::Model::add_upper_constraint(DummyValType upper_bound, Expression expr,
-                                             std::string * name)
+                                             std::string name)
 {
 	assert(upper_bound == GurobiInterface::INFINITY);
 }
@@ -214,21 +209,21 @@ GurobiInterface::Model::add_upper_constraint(DummyValType upper_bound, Expressio
 template <class LowerValType>
 void
 GurobiInterface::Model::add_lower_constraint(std::enable_if_t<std::is_arithmetic<LowerValType>::value> lower_bound,
-                                             Expression expr, std::string * name)
+                                             Expression expr, std::string name)
 {
-	this->m->addConstr(lower_bound, GRB_LESS_EQUAL, expr, *name);
+	this->m->addConstr(lower_bound, GRB_LESS_EQUAL, expr, name);
 }
 
 void
 GurobiInterface::Model::add_lower_constraint(Expression lower_bound, Expression expr,
-                                             std::string * name)
+                                             std::string name)
 {
-	this->m->addConstr(lower_bound, GRB_LESS_EQUAL, expr, *name);
+	this->m->addConstr(lower_bound, GRB_LESS_EQUAL, expr, name);
 }
 
 void
 GurobiInterface::Model::add_lower_constraint(DummyValType lower_bound, Expression expr,
-                                             std::string * name)
+                                             std::string name)
 {
 	assert(lower_bound == GurobiInterface::NEGATIVE_INFINITY);
 }

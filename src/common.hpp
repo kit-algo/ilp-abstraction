@@ -5,31 +5,38 @@
 #ifndef ILP_ABSTRACTION_COMMON_HPP
 #define ILP_ABSTRACTION_COMMON_HPP
 
-enum class ParamType {
+namespace ilpabstraction {
+
+enum class ParamType
+{
 	LOG_TO_CONSOLE,
 	SEED,
 	TIME_LIMIT
 };
 
 
-enum class AttributeType {
+enum class AttributeType
+{
 	LOG_TO_CONSOLE,
 	SEED,
 	TIME_LIMIT
 };
 
-enum class VariableType {
+enum class VariableType
+{
 	CONTINUOUS,
 	INTEGER,
 	BINARY
 };
 
-enum class ObjectiveType {
+enum class ObjectiveType
+{
 	MAXIMIZE,
 	MINIMIZE
 };
 
-enum class ModelStatus {
+enum class ModelStatus
+{
 	READY,
 	SOLVING,
 	OPTIMAL,
@@ -38,11 +45,22 @@ enum class ModelStatus {
 	STOPPED
 };
 
-class Callback {
+class Callback
+{
 public:
-	void on_message(std::string & message) {};
-	void on_poll() {};
-	void on_mip(double incumbent, double bound) {};
+	void on_message(std::string &message)
+	{ (void) message ;};
+
+	void on_poll()
+	{};
+
+	void on_mip(double incumbent, double bound)
+	{
+		(void) incumbent;
+		(void) bound;
+	};
 };
+
+} // namespace ilpabstraction
 
 #endif //ILP_ABSTRACTION_COMMON_HPP
