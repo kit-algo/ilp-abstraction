@@ -43,6 +43,14 @@ public:
 
 		~Model();
 
+		double get_variable_assignment(const Variable & var) const;
+		double get_objective_value() const;
+		double get_bound() const;
+
+		ModelStatus get_status() const;
+
+		void add_callback(Callback cb);
+
 	protected:
 		Model(GurobiInterface * interface);
 
@@ -70,6 +78,19 @@ public:
 		// Disable
 		void add_upper_constraint(DummyValType upper_bound, Expression expr, std::string * name);
 
+		ModelStatus status;
+		std::vector<Callback> cbs;
+
+		class CallbackAdapter : public GRBCallback
+		{
+		public:
+			CallbackAdapter(Model * model);
+			void callback();
+		private:
+			Model * model;
+		};
+
+		CallbackAdapter cba;
 	};
 
 	GurobiInterface(bool auto_commit_variables);

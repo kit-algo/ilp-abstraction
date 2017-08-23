@@ -145,12 +145,32 @@ GurobiInterface::Model::set_objective(Expression expr, ObjectiveType type) {
 void
 GurobiInterface::Model::solve()
 {
+	this->status = ModelStatus::SOLVING;
 	this->m->optimize();
+	switch (this->m->get(GRB_IntAttr_Status)) {
+		case GRB_OPTIMAL:
+			this->status = ModelStatus::OPTIMAL;
+			break;
+		case GRB_INFEASIBLE:
+			this->status = ModelStatus::INFEASIBLE;
+			break;
+		case GRB_UNBOUNDED:
+			this->status = ModelStatus::UNBOUNDED;
+			break;
+		case GRB_TIME_LIMIT:
+		case GRB_ITERATION_LIMIT:
+		case GRB_NODE_LIMIT:
+		default:
+			this->status = ModelStatus::STOPPED;
+			break;
+	}
 }
 
 GurobiInterface::Model::Model(GurobiInterface * interface_in)
-  : interface(interface_in), m(new GRBModel(*interface_in->env))
+  : interface(interface_in), m(new GRBModel(*interface_in->env)), status(ModelStatus::READY),
+    cba(this)
 {
+	this->m->setCallback(&this->cba);
 }
 
 GurobiInterface::Model::~Model()
@@ -211,4 +231,73 @@ GurobiInterface::Model::add_lower_constraint(DummyValType lower_bound, Expressio
                                              std::string * name)
 {
 	assert(lower_bound == GurobiInterface::NEGATIVE_INFINITY);
+}
+
+double
+GurobiInterface::Model::get_variable_assignment(const Variable &var) const
+{
+	return var.get(GRB_DoubleAttr_X);
+}
+
+double
+GurobiInterface::Model::get_objective_value() const
+{
+	return this->m->get(GRB_DoubleAttr_ObjVal);
+}
+
+double
+GurobiInterface::Model::get_bound() const
+{
+	return this->m->get(GRB_DoubleAttr_ObjBound);
+}
+
+ModelStatus
+GurobiInterface::Model::get_status() const
+{
+	return this->status;
+}
+
+GurobiInterface::Model::CallbackAdapter::CallbackAdapter(Model *model_in)
+  : model(model_in)
+{}
+
+void
+GurobiInterface::Model::CallbackAdapter::callback()
+{
+	switch (this->where) {
+		case GRB_CB_POLLING: // Polling
+			for (auto & cb : this->model->cbs) {
+				cb.on_poll();
+			}
+			break;
+		case GRB_CB_PRESOLVE: // Presolve
+		case GRB_CB_SIMPLEX: // Simplex
+			break;
+		case GRB_CB_MIP: // MIP
+		{
+			double obj_val = this->getDoubleInfo(GRB_CB_MIP_OBJBST);
+			double obj_bound = this->getDoubleInfo(GRB_CB_MIP_OBJBND);
+
+			for (auto &cb : this->model->cbs) {
+				cb.on_mip(obj_val, obj_bound);
+			}
+
+			break;
+		}
+		case GRB_CB_MIPSOL: // MIPsol
+		case GRB_CB_MIPNODE: // MIPnode
+			break;
+		case GRB_CB_MESSAGE: // Message
+		{
+			std::string msg = this->getStringInfo(GRB_CB_MSG_STRING);
+			for (auto &cb : this->model->cbs) {
+				cb.on_message(msg);
+			}
+			break;
+		}
+		case GRB_CB_BARRIER: // Barrier
+			break;
+		default:
+			assert(false);
+	}
 }
