@@ -10,9 +10,9 @@ main()
 	GurobiInterface grbi(true);
 	GurobiInterface::Model m = grbi.create_model();
 
-	auto var = m.add_var(VariableType::INTEGER, GurobiInterface::NEGATIVE_INFINITY,
-	          GurobiInterface::INFINITY);
-	m.add_constraint(GurobiInterface::NEGATIVE_INFINITY, var, 10);
+	auto var = m.add_var(VariableType::INTEGER, GurobiInterface::NEGATIVE_INFTY,
+	          GurobiInterface::INFTY);
+	m.add_constraint(GurobiInterface::NEGATIVE_INFTY, var, 10);
 
 	m.solve();
 }

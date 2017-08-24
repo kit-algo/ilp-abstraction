@@ -8,28 +8,13 @@
 
 namespace grb_internal {
 
-	static constexpr std::pair<ParamType, int> param_map_data[] {
-								{ParamType::LOG_TO_CONSOLE, GRB_IntParam_LogToConsole},
-								{ParamType::SEED, GRB_IntParam_Seed},
-								{ParamType::TIME_LIMIT, GRB_DoubleParam_TimeLimit}
-	};
-
-	static constexpr int param_map(ParamType type)
-	{
-		for (auto pair : param_map_data)
-			if (pair.first == type)
-				return pair.second;
-
-		return -1;
-	}
-
 	static constexpr std::pair<VariableType , int> vtype_map_data[] {
 					{VariableType::CONTINUOUS, GRB_CONTINUOUS},
 					{VariableType::BINARY, GRB_BINARY},
 					{VariableType::INTEGER, GRB_INTEGER},
 	};
 
-	static constexpr int vtype_map(VariableType type)
+	inline static constexpr int vtype_map(VariableType type)
 	{
 		for (auto pair : vtype_map_data)
 			if (pair.first == type)
@@ -39,15 +24,15 @@ namespace grb_internal {
 	}
 
 	template<class ValType>
-	double get_value(ValType val) {
+	inline double get_value(ValType val) {
 		return val;
 	};
 
 	template<>
-	double get_value<GurobiInterface::DummyValType>(GurobiInterface::DummyValType val) {
-		if (val == GurobiInterface::INFINITY) {
+	inline double get_value<GurobiInterface::DummyValType>(GurobiInterface::DummyValType val) {
+		if (val == GurobiInterface::INFTY) {
 			return std::numeric_limits<double>::max();
-		} else if (val == GurobiInterface::NEGATIVE_INFINITY) {
+		} else if (val == GurobiInterface::NEGATIVE_INFTY) {
 			return std::numeric_limits<double>::lowest();
 		} else {
 			assert(false);
@@ -57,7 +42,7 @@ namespace grb_internal {
 	template <class T>
 	class DVComparator {
 	public:
-		static bool compare(const GurobiInterface::DummyValType & lhs, const T & rhs) {
+		inline static bool compare(const GurobiInterface::DummyValType & lhs, const T & rhs) {
 			return false;
 		}
 	};
@@ -65,11 +50,28 @@ namespace grb_internal {
 	template <>
 	class DVComparator<GurobiInterface::DummyValType> {
 	public:
-		static bool compare(const GurobiInterface::DummyValType & lhs,
+		inline static bool compare(const GurobiInterface::DummyValType & lhs,
 		                    const GurobiInterface::DummyValType & rhs) {
-			return lhs.tag == rhs.tag;
+			return lhs == rhs;
 		}
 	};
+
+	template <class T>
+	void set_param_on_env(GRBEnv env, ParamType type, T val) {
+		switch(type) {
+			case ParamType::LOG_TO_CONSOLE:
+				env.set(GRB_IntParam_LogToConsole, val);
+				break;
+			case ParamType::TIME_LIMIT:
+				env.set(GRB_DoubleParam_TimeLimit, val);
+				break;
+			case ParamType::SEED:
+				env.set(GRB_IntParam_Seed, val);
+				break;
+			default:
+				assert(false);
+		}
+	}
 
 }; // namespace grb_internal
 
@@ -89,8 +91,16 @@ template <class T>
 void
 GurobiInterface::set_param(ParamType type, T val)
 {
-	this->env->set(grb_internal::param_map(type), val);
+	grb_internal::set_param_on_env(*this->env, type, val);
 }
+
+template <class T>
+void
+GurobiInterface::Model::set_param(ParamType type, T val)
+{
+	grb_internal::set_param_on_env(this->m->getEnv(), type, val);
+}
+
 
 template <class LowerValType, class UpperValType>
 void
@@ -174,7 +184,7 @@ GurobiInterface::Model::~Model()
 }
 
 GurobiInterface::GurobiInterface(bool auto_commit_variables_in)
-  : env(new GRBEnv()), auto_commit_variables(auto_commit_variables_in)
+  : env(new GRBEnv()), Interface(auto_commit_variables_in)
 {
 }
 
@@ -203,7 +213,7 @@ void
 GurobiInterface::Model::add_upper_constraint(DummyValType upper_bound, Expression expr,
                                              std::string name)
 {
-	assert(upper_bound == GurobiInterface::INFINITY);
+	assert(upper_bound == Interface::INFTY);
 }
 
 template <class LowerValType>
@@ -225,7 +235,7 @@ void
 GurobiInterface::Model::add_lower_constraint(DummyValType lower_bound, Expression expr,
                                              std::string name)
 {
-	assert(lower_bound == GurobiInterface::NEGATIVE_INFINITY);
+	assert(lower_bound == Base::NEGATIVE_INFTY);
 }
 
 double
@@ -295,4 +305,28 @@ GurobiInterface::Model::CallbackAdapter::callback()
 		default:
 			assert(false);
 	}
+}
+
+unsigned int
+GurobiInterface::Model::get_variable_count() const
+{
+	return (unsigned int)this->m->get(GRB_IntAttr_NumVars);
+}
+
+unsigned int
+GurobiInterface::Model::get_constraint_count() const
+{
+	return (unsigned int)this->m->get(GRB_IntAttr_NumConstrs);
+}
+
+unsigned int
+GurobiInterface::Model::get_nonzero_count() const
+{
+	return (unsigned int)this->m->get(GRB_IntAttr_NumNZs);
+}
+
+bool
+GurobiInterface::Model::has_feasible() const
+{
+	return this->m->get(GRB_IntAttr_SolCount) > 0;
 }

@@ -14,60 +14,46 @@
 
 namespace ilpabstraction {
 
-class GurobiInterface
+class GurobiInterface : public Interface<GRBVar, GRBLinExpr>
 {
 public:
-	class DummyValType
-	{
-	public:
-		int tag;
-
-		template <class T>
-		friend bool operator==(const GurobiInterface::DummyValType &lhs, const T &rhs);
-	};
-
-public:
-
-	static constexpr DummyValType INFINITY (1);
-	static constexpr DummyValType NEGATIVE_INFINITY { 2 };
-
-	using Expression = GRBLinExpr;
-	using Variable = GRBVar;
+	using Base = Interface<GRBVar, GRBLinExpr>;
 
 	class Model
 	{
 	public:
 		template <class LowerValType, class UpperValType>
-		void add_constraint(LowerValType lower_bound, Expression expr, UpperValType upper_bound,
-		                    std::string name = "");
+		inline void add_constraint(LowerValType lower_bound, Expression expr, UpperValType upper_bound,
+		                           std::string name = "");
 
 		template <class LowerValType, class UpperValType>
-		Variable add_var(VariableType type, LowerValType lower_bound,
-		                 UpperValType upper_bound, std::string name = "");
+		inline Variable add_var(VariableType type, LowerValType lower_bound,
+		                        UpperValType upper_bound, std::string name = "");
 
-		void commit_variables();
+		inline void commit_variables();
 
-		void set_objective(Expression expr, ObjectiveType type);
+		inline void set_objective(Expression expr, ObjectiveType type);
 
-		void solve();
+		inline void solve();
 
-		~Model();
+		inline ~Model();
 
-		double get_variable_assignment(const Variable &var) const;
-		double get_objective_value() const;
-		double get_bound() const;
+		inline double get_variable_assignment(const Variable &var) const;
+		inline double get_objective_value() const;
+		inline double get_bound() const;
 
-		unsigned int get_variable_count() const;
-		unsigned int get_constraint_count() const;
-		unsigned int get_nonzero_count() const;
+		inline unsigned int get_variable_count() const;
+		inline unsigned int get_constraint_count() const;
+		inline unsigned int get_nonzero_count() const;
 
-		ModelStatus get_status() const;
-		bool has_feasible() const;
+		inline ModelStatus get_status() const;
+		inline bool has_feasible() const;
 
-		void add_callback(Callback cb);
+		template <class T>
+		void set_param(ParamType type, T val);
 
 	protected:
-		Model(GurobiInterface *interface);
+		inline Model(GurobiInterface *interface);
 
 		GurobiInterface *interface;
 		GRBModel *m;
@@ -81,10 +67,10 @@ public:
 		                          Expression expr, std::string name);
 
 		// Exrpessions
-		void add_lower_constraint(Expression lower_bound, Expression expr, std::string name);
+		inline void add_lower_constraint(Expression lower_bound, Expression expr, std::string name);
 
 		// Disable
-		void add_lower_constraint(DummyValType lower_bound, Expression expr, std::string name);
+		inline void add_lower_constraint(DummyValType lower_bound, Expression expr, std::string name);
 
 		// Arithmetic types
 		template <class UpperValType>
@@ -92,10 +78,10 @@ public:
 		                          Expression expr, std::string name);
 
 		// Exrpessions
-		void add_upper_constraint(Expression upper_bound, Expression expr, std::string name);
+		inline void add_upper_constraint(Expression upper_bound, Expression expr, std::string name);
 
 		// Disable
-		void add_upper_constraint(DummyValType upper_bound, Expression expr, std::string name);
+		inline void add_upper_constraint(DummyValType upper_bound, Expression expr, std::string name);
 
 		ModelStatus status;
 		std::vector<Callback> cbs;
@@ -103,10 +89,8 @@ public:
 		class CallbackAdapter : public GRBCallback
 		{
 		public:
-			CallbackAdapter(Model *model);
-
-			void callback();
-
+			inline CallbackAdapter(Model *model);
+			inline void callback();
 		private:
 			Model *model;
 		};
@@ -114,17 +98,15 @@ public:
 		CallbackAdapter cba;
 	};
 
-	GurobiInterface(bool auto_commit_variables);
+	inline GurobiInterface(bool auto_commit_variables);
 
 	template <class T>
 	void set_param(ParamType type, T val);
 
-	Model create_model();
+	inline Model create_model();
 
 protected:
 	GRBEnv *env;
-
-	bool auto_commit_variables;
 };
 
 template <class T>
@@ -135,8 +117,8 @@ template <class T>
 bool
 operator!=(const GurobiInterface::DummyValType &lhs, const T &rhs);
 
-constexpr GurobiInterface::DummyValType GurobiInterface::INFINITY;
-constexpr GurobiInterface::DummyValType GurobiInterface::NEGATIVE_INFINITY;
+//constexpr GurobiInterface::DummyValType GurobiInterface::INFTY;
+//constexpr GurobiInterface::DummyValType GurobiInterface::NEGATIVE_INFTY;
 
 #include "ilpa_gurobi.cpp"
 
