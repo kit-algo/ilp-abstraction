@@ -11,6 +11,13 @@ if (GUROBI_FOUND)
     set(LIBS ${LIBS} ${GUROBI_CXX_LIBRARY} ${GUROBI_LIBRARIES} ${GUROBI_CXX_LIBRARY})
 endif(GUROBI_FOUND)
 
+# Find CPLEX
+find_package(CPLEX)
+if (CPLEX_FOUND)
+    include_directories(${CPLEX_INCLUDE_DIRS})
+    set(LIBS ${LIBS} ${CPLEX_LIBRARIES})
+endif(CPLEX_FOUND)
+
 set(SOURCE_FILES main.cpp)
 add_executable(ilp_abstraction ${SOURCE_FILES})
 target_link_libraries(ilp_abstraction ${LIBS})
