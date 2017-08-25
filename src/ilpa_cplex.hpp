@@ -12,17 +12,25 @@
 
 namespace ilpabstraction {
 
-class CPLEXExpression : public IloExpr {
-public:
-	inline ~CPLEXExpression();
-	using IloExpr::IloExpr;
-};
-
 class CPLEXVariable : public IloNumVar {
 public:
 	inline ~CPLEXVariable();
 	using IloNumVar::IloNumVar;
 	//operator CPLEXExpression() const;
+};
+
+class CPLEXExpression : public IloExpr {
+public:
+	inline CPLEXExpression() : initialized(false) {};
+	inline CPLEXExpression(IloEnv env) : IloExpr(env), initialized(true) {};
+	inline CPLEXExpression(CPLEXVariable var) : IloExpr(var), initialized(true) {};
+
+	template <class T>
+	CPLEXExpression(T param) : IloExpr(param), initialized(true) {};
+
+	inline ~CPLEXExpression();
+private:
+	bool initialized;
 };
 
 class CPLEXInterface : public Interface<CPLEXVariable, CPLEXExpression>
@@ -88,6 +96,8 @@ public:
 	inline ~CPLEXInterface();
 
 	inline Model create_model();
+	inline Expression create_expression();
+	inline Variable create_variable();
 
 private:
 	IloEnv env;

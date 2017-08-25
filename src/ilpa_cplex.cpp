@@ -33,11 +33,13 @@ namespace cplex_internal {
 
 CPLEXExpression::~CPLEXExpression()
 {
-	this->end();
+	if (this->initialized) {
+		//this->end();
+	}
 }
 
 CPLEXVariable::~CPLEXVariable(){
-	this->end();
+	//this->end();
 }
 
 /*CPLEXVariable::operator CPLEXExpression() const
@@ -60,6 +62,18 @@ CPLEXInterface::Model
 CPLEXInterface::create_model()
 {
 	return Model(this);
+}
+
+CPLEXInterface::Expression
+CPLEXInterface::create_expression()
+{
+	return Expression(this->env);
+}
+
+CPLEXInterface::Variable
+CPLEXInterface::create_variable()
+{
+	return Variable(this->env);
 }
 
 CPLEXInterface::Model::Model(CPLEXInterface *interface_in)

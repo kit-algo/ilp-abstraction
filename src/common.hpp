@@ -128,6 +128,14 @@ public:
 
 	Model create_model() = delete;
 
+	Expression create_expression() {
+		return Expression();
+	};
+
+	Variable create_variable() {
+		return Variable();
+	};
+
 protected:
 	bool auto_commit_variables;
 };
