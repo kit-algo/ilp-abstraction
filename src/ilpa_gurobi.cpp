@@ -8,13 +8,13 @@
 
 namespace grb_internal {
 
-	static constexpr std::pair<VariableType , int> vtype_map_data[] {
+	static constexpr std::pair<VariableType , char> vtype_map_data[] {
 					{VariableType::CONTINUOUS, GRB_CONTINUOUS},
 					{VariableType::BINARY, GRB_BINARY},
 					{VariableType::INTEGER, GRB_INTEGER},
 	};
 
-	inline static constexpr int vtype_map(VariableType type)
+	inline static constexpr char vtype_map(VariableType type)
 	{
 		for (auto pair : vtype_map_data)
 			if (pair.first == type)
@@ -26,7 +26,7 @@ namespace grb_internal {
 	template<class ValType>
 	inline double get_value(ValType val) {
 		return val;
-	};
+	}
 
 	template<>
 	inline double get_value<GurobiInterface::DummyValType>(GurobiInterface::DummyValType val) {
@@ -37,7 +37,7 @@ namespace grb_internal {
 		} else {
 			assert(false);
 		}
-	};
+	}
 
 	template <class T>
 	class DVComparator {
@@ -73,7 +73,7 @@ namespace grb_internal {
 		}
 	}
 
-}; // namespace grb_internal
+} // namespace grb_internal
 
 template<class T>
 bool operator==(const GurobiInterface::DummyValType & lhs, const T & rhs)
@@ -184,7 +184,7 @@ GurobiInterface::Model::~Model()
 }
 
 GurobiInterface::GurobiInterface(bool auto_commit_variables_in)
-  : env(new GRBEnv()), Interface(auto_commit_variables_in)
+  : Interface(auto_commit_variables_in), env(new GRBEnv())
 {
 }
 
@@ -213,6 +213,9 @@ void
 GurobiInterface::Model::add_upper_constraint(DummyValType upper_bound, Expression expr,
                                              std::string name)
 {
+	(void) upper_bound;
+	(void) expr;
+	(void) name;
 	assert(upper_bound == Interface::INFTY);
 }
 
@@ -235,6 +238,9 @@ void
 GurobiInterface::Model::add_lower_constraint(DummyValType lower_bound, Expression expr,
                                              std::string name)
 {
+	(void) lower_bound;
+	(void) expr;
+	(void) name;
 	assert(lower_bound == Base::NEGATIVE_INFTY);
 }
 

@@ -14,15 +14,15 @@ namespace ilpabstraction {
 
 class CPLEXExpression : public IloExpr {
 public:
-	~CPLEXExpression();
+	inline ~CPLEXExpression();
 	using IloExpr::IloExpr;
 };
 
 class CPLEXVariable : public IloNumVar {
 public:
-	~CPLEXVariable();
+	inline ~CPLEXVariable();
 	using IloNumVar::IloNumVar;
-	operator CPLEXExpression() const;
+	//operator CPLEXExpression() const;
 };
 
 class CPLEXInterface : public Interface<CPLEXVariable, CPLEXExpression>
@@ -30,10 +30,13 @@ class CPLEXInterface : public Interface<CPLEXVariable, CPLEXExpression>
 public:
 	using Base = Interface<CPLEXVariable, CPLEXExpression>;
 
+	static constexpr const char * NAME = "CPLEX";
+
 	static constexpr const auto INFTY = +IloInfinity;
 	static constexpr const auto NEGATIVE_INFTY = -IloInfinity;
 
-	class Model {
+	class Model : public Base::Model
+	{
 	public:
 		template <class LowerValType, class UpperValType>
 		inline void add_constraint(LowerValType lower_bound, Expression expr, UpperValType upper_bound,
@@ -78,7 +81,7 @@ public:
 
 		bool cplex_up_to_date;
 
-		void extract();
+		inline void extract();
 	};
 
 	inline CPLEXInterface(bool auto_commit_variables);
@@ -91,6 +94,52 @@ private:
 };
 
 } // namespace ilpabstraction
+
+inline auto operator* (ilpabstraction::CPLEXVariable & var, unsigned int i) {
+	assert(i <= std::numeric_limits<int>::max());
+	return (IloNumVar)var * (int)i;
+}
+inline auto operator* (unsigned int i, ilpabstraction::CPLEXVariable & var) {
+	assert(i <= std::numeric_limits<int>::max());
+	return (IloNumVar)var * (int)i;
+}
+inline auto operator* (ilpabstraction::CPLEXVariable & var, int i) {
+	assert(i <= std::numeric_limits<int>::max());
+	return (IloNumVar)var * i;
+}
+inline auto operator* (int i, ilpabstraction::CPLEXVariable & var) {
+	return (IloNumVar)var * i;
+}
+inline auto operator* (ilpabstraction::CPLEXVariable & var, double d) {
+	return (IloNumVar)var * d;
+}
+inline auto operator* (double d, ilpabstraction::CPLEXVariable & var) {
+	return (IloNumVar)var * d;
+}
+
+inline auto operator* (unsigned int i, ilpabstraction::CPLEXExpression & expr) {
+	assert(i <= std::numeric_limits<int>::max());
+	return (IloExpr)expr * (int)i;
+}
+inline auto operator* (ilpabstraction::CPLEXExpression & expr, unsigned int i) {
+	assert(i <= std::numeric_limits<int>::max());
+	return (IloExpr)expr * (int)i;
+}
+inline auto operator* (double d, ilpabstraction::CPLEXExpression & expr) {
+	return (IloExpr)expr * d;
+}
+inline auto operator* (ilpabstraction::CPLEXExpression & expr, double d) {
+	return (IloExpr)expr * d;
+}
+
+inline auto operator* (unsigned int i, const IloNumLinExprTerm & expr) {
+	assert(i <= std::numeric_limits<int>::max());
+	return expr * (int)i;
+}
+inline auto  operator* (const IloNumLinExprTerm & expr, unsigned int i) {
+	assert(i <= std::numeric_limits<int>::max());
+	return expr * (int)i;
+}
 
 #include "ilpa_cplex.cpp"
 

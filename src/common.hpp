@@ -78,6 +78,8 @@ public:
 	static constexpr const DummyValType INFTY = DummyValType::V_INFTY;
 	static constexpr const DummyValType NEGATIVE_INFTY = DummyValType::V_NEGATIVE_INFTY;
 
+	static constexpr const char * NAME = "BASE";
+
 	class Model
 	{
 	public:

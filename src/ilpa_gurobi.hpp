@@ -19,7 +19,9 @@ class GurobiInterface : public Interface<GRBVar, GRBLinExpr>
 public:
 	using Base = Interface<GRBVar, GRBLinExpr>;
 
-	class Model
+	static constexpr const char * NAME = "Gurobi";
+
+	class Model : public Base::Model
 	{
 	public:
 		template <class LowerValType, class UpperValType>
@@ -122,6 +124,6 @@ operator!=(const GurobiInterface::DummyValType &lhs, const T &rhs);
 
 #include "ilpa_gurobi.cpp"
 
-}; // namespace ilpabstraction
+} // namespace ilpabstraction
 
 #endif //ILP_ABSTRACTION_GUROBI_HPP
