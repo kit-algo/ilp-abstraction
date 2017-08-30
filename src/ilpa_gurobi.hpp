@@ -14,10 +14,38 @@
 
 namespace ilpabstraction {
 
-class GurobiInterface : public Interface<GRBVar, GRBLinExpr>
+namespace grb_internal {
+	class CallbackContext; // forward
+
+	class GRBCallbackFriendshipProxy : public GRBCallback {
+	protected:
+		friend class CallbackContext;
+	};
+
+	class CallbackContext
+	{
+	public:
+		inline CallbackContext(GRBCallbackFriendshipProxy * grb_cb);
+
+		inline double get_objective_value() const;
+		inline double get_bound() const;
+		inline double get_gap() const;
+		inline double get_time() const;
+		inline int get_processed_nodes() const;
+		inline int get_open_nodes() const;
+		inline int get_solution_count() const;
+	private:
+		GRBCallbackFriendshipProxy * grb_cb;
+	};
+
+} // namespace grb_internal
+
+class GurobiInterface : public Interface<GRBVar, GRBLinExpr, grb_internal::CallbackContext>
 {
 public:
-	using Base = Interface<GRBVar, GRBLinExpr>;
+	using Base = Interface<GRBVar, GRBLinExpr, grb_internal::CallbackContext>;
+	using Callback = Base::Callback;
+	using CallbackContext = Base::CallbackContext ;
 
 	static constexpr const char * NAME = "Gurobi";
 
@@ -86,13 +114,13 @@ public:
 		inline void add_upper_constraint(DummyValType upper_bound, Expression expr, std::string name);
 
 		ModelStatus status;
-		std::vector<Callback> cbs;
 
-		class CallbackAdapter : public GRBCallback
+		class CallbackAdapter : public grb_internal::GRBCallbackFriendshipProxy
 		{
 		public:
 			inline CallbackAdapter(Model *model);
 			inline void callback();
+
 		private:
 			Model *model;
 		};
@@ -122,8 +150,8 @@ operator!=(const GurobiInterface::DummyValType &lhs, const T &rhs);
 //constexpr GurobiInterface::DummyValType GurobiInterface::INFTY;
 //constexpr GurobiInterface::DummyValType GurobiInterface::NEGATIVE_INFTY;
 
-#include "ilpa_gurobi.cpp"
-
 } // namespace ilpabstraction
+
+#include "ilpa_gurobi.cpp"
 
 #endif //ILP_ABSTRACTION_GUROBI_HPP

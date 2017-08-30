@@ -47,23 +47,61 @@ enum class ModelStatus
 	STOPPED
 };
 
-class Callback
+template<class ContextT>
+class CallbackBase
 {
 public:
-	virtual void on_message(std::string &message)
-	{ (void) message ;};
+	using Context = ContextT;
 
-	virtual void on_poll()
-	{};
-
-	virtual void on_mip(double incumbent, double bound)
+	virtual void on_message(Context & ctx, std::string &message)
 	{
-		(void) incumbent;
-		(void) bound;
+		(void) ctx;
+		(void) message ;
 	};
+
+	virtual void on_poll(Context & ctx)
+	{
+		(void) ctx;
+	};
+
+protected:
+	// TODO move to implementation
+	double get_bound(Context & ctx) const {
+		return ctx.get_bound() ;
+	};
+
+	double get_objective_value(Context & ctx) const
+	{
+		return ctx.get_objective_value() ;
+	};
+
+	double get_gap(Context & ctx) const
+	{
+		return ctx.get_gap() ;
+	};
+
+	double get_time(Context & ctx) const
+	{
+		return ctx.get_time() ;
+	};
+
+	int get_processed_nodes(Context & ctx) const
+	{
+		return ctx.get_processed_nodes() ;
+	};
+
+	int get_open_nodes(Context & ctx) const
+	{
+		return ctx.get_open_nodes();
+	};
+
+	int get_solution_count(Context & ctx) const
+	{
+		return ctx.get_solution_count();
+	}
 };
 
-template<class VariableT, class ExpressionT>
+template<class VariableT, class ExpressionT, class CContextT>
 class Interface {
 public:
 	enum class DummyValType
@@ -74,6 +112,8 @@ public:
 public:
 	using Expression = ExpressionT;
 	using Variable = VariableT;
+	using CallbackContext = CContextT;
+	using Callback = CallbackBase<CallbackContext>;
 
 	static constexpr const DummyValType INFTY = DummyValType::V_INFTY;
 	static constexpr const DummyValType NEGATIVE_INFTY = DummyValType::V_NEGATIVE_INFTY;
@@ -108,15 +148,15 @@ public:
 		ModelStatus get_status() const = delete;
 		bool has_feasible() const = delete;
 
-		void add_callback(Callback cb) {
+		void add_callback(CallbackBase<CallbackContext> * cb) {
 			this->cbs.push_back(cb);
 		};
 
 		template <class T>
 		void set_param(ParamType type, T val) = delete;
 
-	private:
-		std::vector<Callback> cbs;
+	protected:
+		std::vector<CallbackBase<CallbackContext> *> cbs;
 	};
 
 	Interface(bool auto_commit_variables_in)
@@ -141,5 +181,7 @@ protected:
 };
 
 } // namespace ilpabstraction
+
+#include "common.cpp"
 
 #endif //ILP_ABSTRACTION_COMMON_HPP

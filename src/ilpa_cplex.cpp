@@ -31,16 +31,16 @@ namespace cplex_internal {
 	}
 } // namespace cplex_internal
 
-CPLEXExpression::~CPLEXExpression()
+/*CPLEXExpression::~CPLEXExpression()
 {
 	if (this->initialized) {
 		//this->end();
 	}
-}
+}*/
 
-CPLEXVariable::~CPLEXVariable(){
+/*CPLEXVariable::~CPLEXVariable(){
 	//this->end();
-}
+}*/
 
 /*CPLEXVariable::operator CPLEXExpression() const
 {
@@ -80,6 +80,7 @@ CPLEXInterface::Model::Model(CPLEXInterface *interface_in)
   : interface(interface_in), cplex(interface_in->env), m(interface_in->env)
 {
 	this->status = ModelStatus::READY;
+	this->cba = CallbackAdapter::create(interface_in->env, this);
 }
 
 CPLEXInterface::Model::~Model()
@@ -173,6 +174,8 @@ CPLEXInterface::Model::solve()
 
 	this->status = ModelStatus::SOLVING;
 
+	this->cplex.use(this->cba);
+
 	this->cplex.solve();
 
 	switch (this->cplex.getStatus()) {
@@ -251,5 +254,78 @@ CPLEXInterface::Model::add_constraint(LowerValType lower_bound, Expression expr,
 
 	this->cplex_up_to_date = false;
 }
+
+CPLEXInterface::Model::CallbackAdapter::CallbackAdapter(IloEnv env, Model * model_in)
+	: IloCplex::MIPInfoCallbackI(env), model(model_in)
+{}
+
+IloCplex::CallbackI *
+CPLEXInterface::Model::CallbackAdapter::duplicateCallback() const
+{
+	return (new (this->getEnv()) CallbackAdapter(*this));
+}
+
+IloCplex::Callback
+CPLEXInterface::Model::CallbackAdapter::create(IloEnv env, Model * model)
+{
+	return (new (env) CallbackAdapter(env, model));
+}
+
+void
+CPLEXInterface::Model::CallbackAdapter::main()
+{
+	std::cout << "CB!\n";
+	cplex_internal::CallbackContext ctx(this);
+	for (auto cb : this->model->cbs) {
+		cb->on_poll(ctx);
+	}
+}
+
+namespace cplex_internal {
+
+CallbackContext::CallbackContext(IloCplex::MIPInfoCallbackI * cplex_cb_in)
+				: cplex_cb(cplex_cb_in)
+{}
+
+double
+CallbackContext::get_objective_value() const
+{
+	if (this->cplex_cb->hasIncumbent()) {
+		return this->cplex_cb->getIncumbentObjValue();
+	} else {
+		return -1;
+	}
+}
+
+double
+CallbackContext::get_bound() const
+{
+	if (this->cplex_cb->hasIncumbent()) {
+		return this->cplex_cb->getBestObjValue();
+	} else {
+		return -1;
+	}
+}
+
+double
+CallbackContext::get_gap() const
+{
+	return this->cplex_cb->getMIPRelativeGap();
+}
+
+int
+CallbackContext::get_processed_nodes() const
+{
+	return this->cplex_cb->getNnodes();
+
+}
+
+int
+CallbackContext::get_open_nodes() const
+{
+	return this->cplex_cb->getNremainingNodes();
+}
+
+} // namespace cplex_internal
 
 } // namespace ilpabstraction

@@ -12,31 +12,38 @@
 
 namespace ilpabstraction {
 
+namespace cplex_internal {
+	class CallbackContext {
+	public:
+		inline CallbackContext(IloCplex::MIPInfoCallbackI * cplex_cb);
+		inline double get_objective_value() const;
+		inline double get_bound() const;
+		inline double get_gap() const;
+		inline double get_time() const;
+		inline int get_processed_nodes() const;
+		inline int get_open_nodes() const;
+
+	private:
+		IloCplex::MIPInfoCallbackI * cplex_cb;
+	};
+} // namespace cplex_internal
+
 class CPLEXVariable : public IloNumVar {
 public:
-	inline ~CPLEXVariable();
 	using IloNumVar::IloNumVar;
-	//operator CPLEXExpression() const;
 };
 
 class CPLEXExpression : public IloExpr {
 public:
-	inline CPLEXExpression() : initialized(false) {};
-	inline CPLEXExpression(IloEnv env) : IloExpr(env), initialized(true) {};
-	inline CPLEXExpression(CPLEXVariable var) : IloExpr(var), initialized(true) {};
-
-	template <class T>
-	CPLEXExpression(T param) : IloExpr(param), initialized(true) {};
-
-	inline ~CPLEXExpression();
-private:
-	bool initialized;
+	using IloExpr::IloExpr;
 };
 
-class CPLEXInterface : public Interface<CPLEXVariable, CPLEXExpression>
+class CPLEXInterface : public Interface<CPLEXVariable, CPLEXExpression, cplex_internal::CallbackContext>
 {
 public:
-	using Base = Interface<CPLEXVariable, CPLEXExpression>;
+	using Base = Interface<CPLEXVariable, CPLEXExpression, cplex_internal::CallbackContext>;
+	using Callback = Base::Callback;
+	using CallbackContext = Base::CallbackContext;
 
 	static constexpr const char * NAME = "CPLEX";
 
@@ -76,9 +83,23 @@ public:
 
 		inline ~Model();
 	protected:
+
+		class CallbackAdapter : public IloCplex::MIPInfoCallbackI {
+		public:
+			inline static IloCplex::Callback create(IloEnv env, Model * model);
+			inline virtual IloCplex::CallbackI * duplicateCallback() const override;
+		protected:
+			inline virtual void main() override;
+		private:
+			inline CallbackAdapter(IloEnv env, Model * model);
+
+			Model * model;
+		};
+
 		inline Model(CPLEXInterface *interface);
 
 		CPLEXInterface *interface;
+		IloCplex::Callback cba;
 
 		friend class CPLEXInterface;
 

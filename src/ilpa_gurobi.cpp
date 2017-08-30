@@ -6,85 +6,100 @@
 // However, otherwise some "smart" IDEs don't see the declarations…
 #include "ilpa_gurobi.hpp"
 
+namespace ilpabstraction {
+
 namespace grb_internal {
 
-	static constexpr std::pair<VariableType , char> vtype_map_data[] {
-					{VariableType::CONTINUOUS, GRB_CONTINUOUS},
-					{VariableType::BINARY, GRB_BINARY},
-					{VariableType::INTEGER, GRB_INTEGER},
-	};
+static constexpr std::pair<VariableType, char> vtype_map_data[]{
+				{VariableType::CONTINUOUS, GRB_CONTINUOUS},
+				{VariableType::BINARY,     GRB_BINARY},
+				{VariableType::INTEGER,    GRB_INTEGER},
+};
 
-	inline static constexpr char vtype_map(VariableType type)
+inline static constexpr char
+vtype_map(VariableType type)
+{
+	for (auto pair : vtype_map_data)
+		if (pair.first == type)
+			return pair.second;
+
+	return -1;
+}
+
+template <class ValType>
+inline double
+get_value(ValType val)
+{
+	return val;
+}
+
+template <>
+inline double
+get_value<GurobiInterface::DummyValType>(GurobiInterface::DummyValType val)
+{
+	if (val == GurobiInterface::INFTY) {
+		return std::numeric_limits<double>::max();
+	} else if (val == GurobiInterface::NEGATIVE_INFTY) {
+		return std::numeric_limits<double>::lowest();
+	} else {
+		assert(false);
+	}
+}
+
+template <class T>
+class DVComparator
+{
+public:
+	inline static bool compare(const GurobiInterface::DummyValType &lhs, const T &rhs)
 	{
-		for (auto pair : vtype_map_data)
-			if (pair.first == type)
-				return pair.second;
-
-		return -1;
+		return false;
 	}
+};
 
-	template<class ValType>
-	inline double get_value(ValType val) {
-		return val;
+template <>
+class DVComparator<GurobiInterface::DummyValType>
+{
+public:
+	inline static bool compare(const GurobiInterface::DummyValType &lhs,
+	                           const GurobiInterface::DummyValType &rhs)
+	{
+		return lhs == rhs;
 	}
+};
 
-	template<>
-	inline double get_value<GurobiInterface::DummyValType>(GurobiInterface::DummyValType val) {
-		if (val == GurobiInterface::INFTY) {
-			return std::numeric_limits<double>::max();
-		} else if (val == GurobiInterface::NEGATIVE_INFTY) {
-			return std::numeric_limits<double>::lowest();
-		} else {
+template <class T>
+void
+set_param_on_env(GRBEnv env, ParamType type, T val)
+{
+	switch (type) {
+		case ParamType::LOG_TO_CONSOLE:
+			env.set(GRB_IntParam_LogToConsole, val);
+			break;
+		case ParamType::TIME_LIMIT:
+			env.set(GRB_DoubleParam_TimeLimit, val);
+			break;
+		case ParamType::SEED:
+			env.set(GRB_IntParam_Seed, val);
+			break;
+		default:
 			assert(false);
-		}
 	}
-
-	template <class T>
-	class DVComparator {
-	public:
-		inline static bool compare(const GurobiInterface::DummyValType & lhs, const T & rhs) {
-			return false;
-		}
-	};
-
-	template <>
-	class DVComparator<GurobiInterface::DummyValType> {
-	public:
-		inline static bool compare(const GurobiInterface::DummyValType & lhs,
-		                    const GurobiInterface::DummyValType & rhs) {
-			return lhs == rhs;
-		}
-	};
-
-	template <class T>
-	void set_param_on_env(GRBEnv env, ParamType type, T val) {
-		switch(type) {
-			case ParamType::LOG_TO_CONSOLE:
-				env.set(GRB_IntParam_LogToConsole, val);
-				break;
-			case ParamType::TIME_LIMIT:
-				env.set(GRB_DoubleParam_TimeLimit, val);
-				break;
-			case ParamType::SEED:
-				env.set(GRB_IntParam_Seed, val);
-				break;
-			default:
-				assert(false);
-		}
-	}
+}
 
 } // namespace grb_internal
 
-template<class T>
-bool operator==(const GurobiInterface::DummyValType & lhs, const T & rhs)
+template <class T>
+bool
+operator==(const GurobiInterface::DummyValType &lhs, const T &rhs)
 {
 	return grb_internal::DVComparator<T>::compare(lhs, rhs);
 }
 
-template<class T>
-bool operator!=(const GurobiInterface::DummyValType & lhs, const T & rhs)
+template <class T>
+bool
+operator!=(const GurobiInterface::DummyValType &lhs, const T &rhs)
 {
-	return ! (lhs == rhs);
+	return !(lhs == rhs);
 }
 
 template <class T>
@@ -121,7 +136,7 @@ GurobiInterface::Model::add_constraint(LowerValType lower_bound, Expression expr
 template <class LowerValType, class UpperValType>
 GurobiInterface::Variable
 GurobiInterface::Model::add_var(VariableType type, LowerValType lower_bound,
-                               UpperValType upper_bound, std::string name)
+                                UpperValType upper_bound, std::string name)
 {
 	double lower = grb_internal::get_value(lower_bound);
 	double upper = grb_internal::get_value(upper_bound);
@@ -142,7 +157,8 @@ GurobiInterface::Model::commit_variables()
 }
 
 void
-GurobiInterface::Model::set_objective(Expression expr, ObjectiveType type) {
+GurobiInterface::Model::set_objective(Expression expr, ObjectiveType type)
+{
 	auto obj_type = (type == ObjectiveType::MAXIMIZE) ? GRB_MAXIMIZE : GRB_MINIMIZE;
 	this->m->setObjective(expr, obj_type);
 }
@@ -171,9 +187,9 @@ GurobiInterface::Model::solve()
 	}
 }
 
-GurobiInterface::Model::Model(GurobiInterface * interface_in)
-  : interface(interface_in), m(new GRBModel(*interface_in->env)), status(ModelStatus::READY),
-    cba(this)
+GurobiInterface::Model::Model(GurobiInterface *interface_in)
+				: interface(interface_in), m(new GRBModel(*interface_in->env)), status(ModelStatus::READY),
+				  cba(this)
 {
 	this->m->setCallback(&this->cba);
 }
@@ -184,7 +200,7 @@ GurobiInterface::Model::~Model()
 }
 
 GurobiInterface::GurobiInterface(bool auto_commit_variables_in)
-  : Interface(auto_commit_variables_in), env(new GRBEnv())
+				: Interface(auto_commit_variables_in), env(new GRBEnv())
 {
 }
 
@@ -196,8 +212,9 @@ GurobiInterface::create_model()
 
 template <class UpperValType>
 void
-GurobiInterface::Model::add_upper_constraint(std::enable_if_t<std::is_arithmetic<UpperValType>::value> upper_bound,
-                                             Expression expr, std::string name)
+GurobiInterface::Model::add_upper_constraint(
+				std::enable_if_t<std::is_arithmetic<UpperValType>::value> upper_bound,
+				Expression expr, std::string name)
 {
 	this->m->addConstr(upper_bound, GRB_GREATER_EQUAL, expr, name);
 }
@@ -213,16 +230,17 @@ void
 GurobiInterface::Model::add_upper_constraint(DummyValType upper_bound, Expression expr,
                                              std::string name)
 {
-	(void) upper_bound;
-	(void) expr;
-	(void) name;
+	(void)upper_bound;
+	(void)expr;
+	(void)name;
 	assert(upper_bound == Interface::INFTY);
 }
 
 template <class LowerValType>
 void
-GurobiInterface::Model::add_lower_constraint(std::enable_if_t<std::is_arithmetic<LowerValType>::value> lower_bound,
-                                             Expression expr, std::string name)
+GurobiInterface::Model::add_lower_constraint(
+				std::enable_if_t<std::is_arithmetic<LowerValType>::value> lower_bound,
+				Expression expr, std::string name)
 {
 	this->m->addConstr(lower_bound, GRB_LESS_EQUAL, expr, name);
 }
@@ -238,9 +256,9 @@ void
 GurobiInterface::Model::add_lower_constraint(DummyValType lower_bound, Expression expr,
                                              std::string name)
 {
-	(void) lower_bound;
-	(void) expr;
-	(void) name;
+	(void)lower_bound;
+	(void)expr;
+	(void)name;
 	assert(lower_bound == Base::NEGATIVE_INFTY);
 }
 
@@ -269,16 +287,18 @@ GurobiInterface::Model::get_status() const
 }
 
 GurobiInterface::Model::CallbackAdapter::CallbackAdapter(Model *model_in)
-  : model(model_in)
+				: model(model_in)
 {}
 
 void
 GurobiInterface::Model::CallbackAdapter::callback()
 {
+	grb_internal::CallbackContext ctx(this);
+
 	switch (this->where) {
 		case GRB_CB_POLLING: // Polling
-			for (auto & cb : this->model->cbs) {
-				cb.on_poll();
+			for (auto cb : this->model->cbs) {
+				cb->on_poll(ctx);
 			}
 			break;
 		case GRB_CB_PRESOLVE: // Presolve
@@ -286,13 +306,17 @@ GurobiInterface::Model::CallbackAdapter::callback()
 			break;
 		case GRB_CB_MIP: // MIP
 		{
+			for (auto cb : this->model->cbs) {
+				cb->on_poll(ctx);
+			}
+			/*
 			double obj_val = this->getDoubleInfo(GRB_CB_MIP_OBJBST);
 			double obj_bound = this->getDoubleInfo(GRB_CB_MIP_OBJBND);
 
-			for (auto &cb : this->model->cbs) {
-				cb.on_mip(obj_val, obj_bound);
+			for (auto cb : this->model->cbs) {
+				cb->on_mip(obj_val, obj_bound);
 			}
-
+			*/
 			break;
 		}
 		case GRB_CB_MIPSOL: // MIPsol
@@ -301,8 +325,8 @@ GurobiInterface::Model::CallbackAdapter::callback()
 		case GRB_CB_MESSAGE: // Message
 		{
 			std::string msg = this->getStringInfo(GRB_CB_MSG_STRING);
-			for (auto &cb : this->model->cbs) {
-				cb.on_message(msg);
+			for (auto cb : this->model->cbs) {
+				cb->on_message(ctx, msg);
 			}
 			break;
 		}
@@ -336,3 +360,94 @@ GurobiInterface::Model::has_feasible() const
 {
 	return this->m->get(GRB_IntAttr_SolCount) > 0;
 }
+
+namespace grb_internal {
+
+CallbackContext::CallbackContext(GRBCallbackFriendshipProxy *grb_cb_in)
+				: grb_cb(grb_cb_in)
+{}
+
+double
+CallbackContext::get_objective_value() const
+{
+	if (this->get_solution_count() < 1) {
+		return -1;
+	}
+
+	if (this->grb_cb->where == GRB_CB_MIP) {
+		return this->grb_cb->getDoubleInfo(GRB_CB_MIP_OBJBST);
+	} else if (this->grb_cb->where == GRB_CB_MIPNODE) {
+		return this->grb_cb->getDoubleInfo(GRB_CB_MIPNODE_OBJBST);
+	} else {
+		return -1;
+	}
+}
+
+double
+CallbackContext::get_bound() const
+{
+	if (this->grb_cb->where == GRB_CB_MIP) {
+		return this->grb_cb->getDoubleInfo(GRB_CB_MIP_OBJBND);
+	} else if (this->grb_cb->where == GRB_CB_MIPNODE) {
+		return this->grb_cb->getDoubleInfo(GRB_CB_MIPNODE_OBJBND);
+	} else {
+		return -1;
+	}
+}
+
+double
+CallbackContext::get_gap() const
+{
+	if (this->get_solution_count() < 1) {
+		return 1;
+	}
+	
+	if ((this->grb_cb->where == GRB_CB_MIP) || (this->grb_cb->where == GRB_CB_MIPNODE)) {
+		double obj_val = this->get_objective_value();
+		double bound = this->get_bound();
+
+		if (obj_val > bound) {
+			return 1 - (bound / obj_val);
+		} else {
+			return obj_val / bound;
+		}
+	} else {
+		return -1;
+	}
+}
+
+int
+CallbackContext::get_processed_nodes() const
+{
+	if (this->grb_cb->where == GRB_CB_MIP) {
+		return (int)this->grb_cb->getDoubleInfo(GRB_CB_MIP_NODCNT);
+	} else {
+		return -1;
+	}
+}
+
+int
+CallbackContext::get_open_nodes() const
+{
+	if (this->grb_cb->where == GRB_CB_MIP) {
+		return (int)this->grb_cb->getDoubleInfo(GRB_CB_MIP_NODLFT);
+	} else {
+		return -1;
+	}
+}
+
+int
+CallbackContext::get_solution_count() const
+{
+	if (this->grb_cb->where == GRB_CB_MIP) {
+		return (int)this->grb_cb->getIntInfo(GRB_CB_MIP_SOLCNT);
+	} else if (this->grb_cb->where == GRB_CB_MIPNODE) {
+		return (int)this->grb_cb->getIntInfo(GRB_CB_MIPNODE_SOLCNT);
+	} else {
+		return -1;
+	}
+}
+
+} // namespace grb_internal
+
+} // namespace ilpabstraction
