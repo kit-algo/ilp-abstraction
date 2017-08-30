@@ -5,6 +5,4 @@
 #include "common.hpp"
 
 namespace ilpabstraction {
-
-
-};
+}
