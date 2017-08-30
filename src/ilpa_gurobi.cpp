@@ -52,6 +52,9 @@ class DVComparator
 public:
 	inline static bool compare(const GurobiInterface::DummyValType &lhs, const T &rhs)
 	{
+		// This is only used to compare 'other' types to a DummyValType
+		(void)lhs;
+		(void)rhs;
 		return false;
 	}
 };
@@ -401,7 +404,7 @@ CallbackContext::get_gap() const
 	if (this->get_solution_count() < 1) {
 		return 1;
 	}
-	
+
 	if ((this->grb_cb->where == GRB_CB_MIP) || (this->grb_cb->where == GRB_CB_MIPNODE)) {
 		double obj_val = this->get_objective_value();
 		double bound = this->get_bound();

@@ -255,8 +255,8 @@ CPLEXInterface::Model::add_constraint(LowerValType lower_bound, Expression expr,
 	this->cplex_up_to_date = false;
 }
 
-CPLEXInterface::Model::CallbackAdapter::CallbackAdapter(IloEnv env, Model * model_in)
-	: IloCplex::MIPInfoCallbackI(env), model(model_in)
+CPLEXInterface::Model::CallbackAdapter::CallbackAdapter(IloEnv env_in, Model * model_in)
+	: IloCplex::MIPInfoCallbackI(env_in), model(model_in)
 {}
 
 IloCplex::CallbackI *
@@ -316,14 +316,14 @@ CallbackContext::get_gap() const
 int
 CallbackContext::get_processed_nodes() const
 {
-	return this->cplex_cb->getNnodes();
+	return (int)this->cplex_cb->getNnodes();
 
 }
 
 int
 CallbackContext::get_open_nodes() const
 {
-	return this->cplex_cb->getNremainingNodes();
+	return (int)this->cplex_cb->getNremainingNodes();
 }
 
 } // namespace cplex_internal
