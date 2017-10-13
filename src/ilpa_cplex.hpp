@@ -61,6 +61,9 @@ public:
 		inline Variable add_var(VariableType type, LowerValType lower_bound,
 		                        UpperValType upper_bound, std::string name = "");
 
+		inline void add_sos1_constraint(const std::vector<Variable> & vars,
+		                                const std::vector<double> & weights, std::string name = "");
+
 		inline void commit_variables();
 
 		inline void set_objective(Expression expr, ObjectiveType type);

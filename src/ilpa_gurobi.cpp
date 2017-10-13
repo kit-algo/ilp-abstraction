@@ -136,6 +136,25 @@ GurobiInterface::Model::add_constraint(LowerValType lower_bound, Expression expr
 	add_upper_constraint(upper_bound, expr, upper_name);
 }
 
+void
+GurobiInterface::Model::add_sos1_constraint(const std::vector<Variable> & vars,
+                                            const std::vector<double> & weights, std::string name)
+{
+	(void)name;
+	
+	if (weights.size() > 0) {
+		this->m->addSOS(vars.data(), weights.data(), vars.size(), GRB_SOS_TYPE1);
+	} else {
+		std::vector<double> dummy_weights;
+		for (size_t i = 0 ; i < vars.size() ; ++i) {
+			dummy_weights.push_back(i);
+		}
+
+		this->m->addSOS(vars.data(), dummy_weights.data(), vars.size(), GRB_SOS_TYPE1);
+	}
+}
+
+
 template <class LowerValType, class UpperValType>
 GurobiInterface::Variable
 GurobiInterface::Model::add_var(VariableType type, LowerValType lower_bound,

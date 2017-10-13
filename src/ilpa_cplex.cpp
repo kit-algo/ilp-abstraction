@@ -255,6 +255,31 @@ CPLEXInterface::Model::add_constraint(LowerValType lower_bound, Expression expr,
 	this->cplex_up_to_date = false;
 }
 
+void
+CPLEXInterface::Model::add_sos1_constraint(const std::vector<Variable> & vars,
+                                           const std::vector<double> & weights, std::string name)
+{
+	IloNumVarArray array(this->interface->env);
+	for (const auto & var : vars) {
+		array.add(var);
+	}
+
+	if (weights.size() == 0) {
+		IloSOS1 sos(this->interface->env, array, name.c_str());
+		this->m.add(sos);
+	} else {
+		IloNumArray w_array(this->interface->env);
+		for (const auto & w : weights) {
+			w_array.add(w);
+		}
+		IloSOS1 sos(this->interface->env, array, w_array, name.c_str());
+		this->m.add(sos);
+	}
+
+	this->cplex_up_to_date = false;
+}
+
+
 CPLEXInterface::Model::CallbackAdapter::CallbackAdapter(IloEnv env_in, Model * model_in)
 	: IloCplex::MIPInfoCallbackI(env_in), model(model_in)
 {}
