@@ -299,7 +299,6 @@ CPLEXInterface::Model::CallbackAdapter::create(IloEnv env, Model * model)
 void
 CPLEXInterface::Model::CallbackAdapter::main()
 {
-	std::cout << "CB!\n";
 	cplex_internal::CallbackContext ctx(this);
 	for (auto cb : this->model->cbs) {
 		cb->on_poll(ctx);

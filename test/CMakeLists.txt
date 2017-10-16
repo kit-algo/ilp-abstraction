@@ -5,7 +5,7 @@ find_package( Threads )
 add_executable (run_tests main.cpp)
 
 set_target_properties(run_tests
-                      PROPERTIES COMPILE_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage -Wall -Wextra -pedantic"
+                      PROPERTIES COMPILE_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage -Wall -Wextra -pedantic -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wcast-align -Wstrict-overflow=5 -Wwrite-strings -Wcast-qual -Wswitch-default -Wswitch-enum -Wconversion -Wunreachable-code -Wfloat-equal -Wswitch-default"
                       )
 set_target_properties(run_tests
                       PROPERTIES LINK_FLAGS "-fprofile-arcs -ftest-coverage"

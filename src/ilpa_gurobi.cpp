@@ -141,16 +141,19 @@ GurobiInterface::Model::add_sos1_constraint(const std::vector<Variable> & vars,
                                             const std::vector<double> & weights, std::string name)
 {
 	(void)name;
-	
+
+	assert(vars.size() <= std::numeric_limits<int>::max());
+	assert(vars.size() <= std::numeric_limits<double>::max());
+
 	if (weights.size() > 0) {
-		this->m->addSOS(vars.data(), weights.data(), vars.size(), GRB_SOS_TYPE1);
+		this->m->addSOS(vars.data(), weights.data(), (int)vars.size(), GRB_SOS_TYPE1);
 	} else {
 		std::vector<double> dummy_weights;
 		for (size_t i = 0 ; i < vars.size() ; ++i) {
-			dummy_weights.push_back(i);
+			dummy_weights.push_back((int)i);
 		}
 
-		this->m->addSOS(vars.data(), dummy_weights.data(), vars.size(), GRB_SOS_TYPE1);
+		this->m->addSOS(vars.data(), dummy_weights.data(), (int)vars.size(), GRB_SOS_TYPE1);
 	}
 }
 
