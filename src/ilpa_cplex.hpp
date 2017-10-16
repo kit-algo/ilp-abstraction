@@ -175,6 +175,15 @@ inline auto  operator* (const IloNumLinExprTerm & expr, unsigned int i) {
 	return expr * (int)i;
 }
 
+inline auto operator<= (unsigned int i, const IloNumExprArg & expr) {
+	assert(i <= std::numeric_limits<int>::max());
+	return (int)i <= expr;
+}
+inline auto operator<= (const IloNumExprArg & expr, unsigned int i) {
+	assert(i <= std::numeric_limits<int>::max());
+	return expr <= (int)i ;
+}
+
 #include "ilpa_cplex.cpp"
 
 #endif //ILP_ABSTRACTION_CPLEX_HPP
