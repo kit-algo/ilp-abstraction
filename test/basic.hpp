@@ -18,6 +18,8 @@ public:
 	void test_minimal() {
 		auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
 		                           Solver::INFTY);
+		this->m.commit_variables();
+
 		m.add_constraint(Solver::NEGATIVE_INFTY, var, 10);
 
 		auto obj = this->s.create_expression();
@@ -29,11 +31,27 @@ public:
 		ASSERT_EQ(m.get_objective_value(), 10);
 	}
 
+	void test_write(const std::string & suffix) {
+		auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
+		                           Solver::INFTY);
+		this->m.commit_variables();
+
+		m.add_constraint(Solver::NEGATIVE_INFTY, var, 10);
+
+		auto obj = this->s.create_expression();
+		obj += var;
+		m.set_objective(obj, ObjectiveType::MAXIMIZE);
+
+		m.write(std::string("/tmp/test_") + suffix + std::string(".lp"));
+	}
+
 	void test_math_ops() {
 		auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
 		                           Solver::INFTY);
 		auto var2 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
 		                           Solver::INFTY);
+		this->m.commit_variables();
+
 		auto expr = this->s.create_expression();
 		expr += var;
 
@@ -57,6 +75,7 @@ public:
 		                           10);
 		auto var2 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
 		                            20);
+		this->m.commit_variables();
 
 		auto obj = this->s.create_expression();
 		obj += var1;
@@ -108,6 +127,13 @@ BasicTest<GurobiInterface> test_grb;
 test_grb.test_math_ops();
 BasicTest<CPLEXInterface> test_cplex;
 test_cplex.test_math_ops();
+}
+
+TEST(BasicTest, test_write) {
+BasicTest<GurobiInterface> test_grb;
+test_grb.test_write("grb");
+BasicTest<CPLEXInterface> test_cplex;
+test_cplex.test_write("cplex");
 }
 
 }

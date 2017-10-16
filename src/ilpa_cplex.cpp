@@ -127,6 +127,17 @@ CPLEXInterface::Model::get_nonzero_count()
 	return (unsigned int)this->cplex.getNNZs();
 }
 
+void
+CPLEXInterface::Model::write(const std::string & filename)
+{
+	if (!this->cplex_up_to_date) {
+		this->extract();
+	}
+
+	this->cplex.exportModel(filename.c_str());
+}
+
+
 unsigned int
 CPLEXInterface::Model::get_constraint_count()
 {

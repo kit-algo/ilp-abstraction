@@ -176,6 +176,13 @@ GurobiInterface::Model::add_var(VariableType type, LowerValType lower_bound,
 }
 
 void
+GurobiInterface::Model::write(const std::string & filename)
+{
+	this->m->write(filename);
+}
+
+
+void
 GurobiInterface::Model::commit_variables()
 {
 	this->m->update();

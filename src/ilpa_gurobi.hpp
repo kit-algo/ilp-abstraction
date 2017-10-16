@@ -85,6 +85,8 @@ public:
 		template <class T>
 		void set_param(ParamType type, T val);
 
+		inline void write(const std::string & filename);
+
 	protected:
 		inline Model(GurobiInterface *interface);
 
