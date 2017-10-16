@@ -181,6 +181,12 @@ GurobiInterface::Model::write(const std::string & filename)
 	this->m->write(filename);
 }
 
+void
+GurobiInterface::Model::write_solution(const std::string & filename)
+{
+	this->m->write(filename + std::string(".sol"));
+}
+
 
 void
 GurobiInterface::Model::commit_variables()

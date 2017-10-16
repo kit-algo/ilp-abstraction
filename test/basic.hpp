@@ -43,6 +43,10 @@ public:
 		m.set_objective(obj, ObjectiveType::MAXIMIZE);
 
 		m.write(std::string("/tmp/test_") + suffix + std::string(".lp"));
+
+		m.solve();
+
+		m.write_solution(std::string("/tmp/test_") + suffix);
 	}
 
 	void test_math_ops() {

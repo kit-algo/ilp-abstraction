@@ -86,6 +86,7 @@ public:
 		void set_param(ParamType type, T val);
 
 		inline void write(const std::string & filename);
+		inline void write_solution(const std::string & filename);
 
 	protected:
 		inline Model(GurobiInterface *interface);

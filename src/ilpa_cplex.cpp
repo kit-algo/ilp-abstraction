@@ -137,6 +137,16 @@ CPLEXInterface::Model::write(const std::string & filename)
 	this->cplex.exportModel(filename.c_str());
 }
 
+void
+CPLEXInterface::Model::write_solution(const std::string & filename)
+{
+	if (!this->cplex_up_to_date) {
+		this->extract();
+	}
+
+	std::string extended_fname = filename + std::string(".sol");
+	this->cplex.writeSolution(extended_fname.c_str());
+}
 
 unsigned int
 CPLEXInterface::Model::get_constraint_count()
