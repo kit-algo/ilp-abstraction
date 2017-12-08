@@ -85,6 +85,9 @@ public:
 		template <class T>
 		void set_param(ParamType type, T val);
 
+		template <class T>
+		void set_start(Variable & var, T val);
+
 		inline void write(const std::string & filename);
 		inline void write_solution(const std::string & filename);
 

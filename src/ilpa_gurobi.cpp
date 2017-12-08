@@ -119,6 +119,12 @@ GurobiInterface::Model::set_param(ParamType type, T val)
 	grb_internal::set_param_on_env(this->m->getEnv(), type, val);
 }
 
+template <class T>
+void
+GurobiInterface::Model::set_start(Variable & var, T val)
+{
+	var.set(GRB_DoubleAttr_Start, val);
+}
 
 template <class LowerValType, class UpperValType>
 void

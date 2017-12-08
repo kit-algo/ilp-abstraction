@@ -159,6 +159,9 @@ public:
 		template <class T>
 		void set_param(ParamType type, T val) = delete;
 
+		template <class T>
+		void set_start(Variable & var, T val) = delete;
+
 	protected:
 		std::vector<CallbackBase<CallbackContext> *> cbs;
 	};

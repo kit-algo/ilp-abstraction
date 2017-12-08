@@ -96,6 +96,13 @@ CPLEXInterface::Model::set_param(ParamType type, T val)
 	cplex_internal::set_param_on_cplex(this->cplex, type, val);
 }
 
+template<class T>
+void
+CPLEXInterface::Model::set_start(Variable & var, T val)
+{
+	this->start_values.insert(std::make_pair<long, IloNum>(var.getId(), IloNum(val)));
+}
+
 bool
 CPLEXInterface::Model::has_feasible() const
 {
@@ -187,11 +194,34 @@ CPLEXInterface::Model::get_variable_assignment(const Variable &var) const
 }
 
 void
+CPLEXInterface::Model::apply_start_solution()
+{
+	if (this->start_values.empty()) {
+		// TODO remove a set start solution?
+		return;
+	}
+
+	IloNumVarArray startVar(this->interface->env);
+	IloNumArray startVal(this->interface->env);
+	for (auto & entry : this->start_values) {
+		startVar.add(this->interface->env.getExtractable(entry.first));
+		startVal.add(entry.second);
+	}
+
+	this->cplex.addMIPStart(startVar, startVal);
+
+	startVar.end();
+	startVal.end();
+}
+
+void
 CPLEXInterface::Model::solve()
 {
 	if (!this->cplex_up_to_date) {
 		this->extract();
 	}
+
+	this->apply_start_solution();
 
 	this->status = ModelStatus::SOLVING;
 

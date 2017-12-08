@@ -9,6 +9,7 @@
 
 #define IL_STD 1
 #include <ilcplex/ilocplex.h>
+#include <unordered_map>
 
 namespace ilpabstraction {
 
@@ -31,6 +32,10 @@ namespace cplex_internal {
 class CPLEXVariable : public IloNumVar {
 public:
 	using IloNumVar::IloNumVar;
+
+	bool operator==(const CPLEXVariable & other) const {
+		return other.getId() == this->getId();
+	}
 };
 
 class CPLEXExpression : public IloExpr {
@@ -84,6 +89,9 @@ public:
 		template <class T>
 		void set_param(ParamType type, T val);
 
+		template <class T>
+		void set_start(Variable & var, T val);
+
 		inline void write(const std::string & filename);
 		inline void write_solution(const std::string & filename);
 
@@ -117,6 +125,9 @@ public:
 		bool cplex_up_to_date;
 
 		inline void extract();
+		inline void apply_start_solution();
+
+		std::unordered_map<long, IloNum> start_values;
 	};
 
 	inline CPLEXInterface(bool auto_commit_variables);
