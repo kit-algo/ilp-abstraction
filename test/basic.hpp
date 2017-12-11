@@ -101,6 +101,30 @@ public:
 		ASSERT_EQ(m.get_objective_value(), 20);
 	}
 
+	void test_setting_start() {
+		auto var1 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
+		                           Solver::INFTY);
+		auto var2 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
+		                           Solver::INFTY);
+		this->m.commit_variables();
+
+		m.add_constraint(0, var1, 10);
+		m.add_constraint(0, var2, 10);
+
+		m.add_constraint(Solver::NEGATIVE_INFTY, var1 + var2, 10);
+
+		auto obj = this->s.create_expression();
+		obj += 2 * var1 + 3 * var2;
+		m.set_objective(obj, ObjectiveType::MAXIMIZE);
+
+		m.set_start(var1, 0);
+		m.set_start(var2, 10);
+
+		m.solve();
+
+		ASSERT_EQ(m.get_objective_value(), 30);
+	}
+
 	BasicTest() : s(true), m(s.create_model()) {}
 	virtual ~BasicTest() {}
 
@@ -138,6 +162,13 @@ BasicTest<GurobiInterface> test_grb;
 test_grb.test_write("grb");
 BasicTest<CPLEXInterface> test_cplex;
 test_cplex.test_write("cplex");
+}
+
+TEST(BasicTest, test_setting_start) {
+BasicTest<GurobiInterface> test_grb;
+test_grb.test_setting_start();
+BasicTest<CPLEXInterface> test_cplex;
+test_cplex.test_setting_start();
 }
 
 }

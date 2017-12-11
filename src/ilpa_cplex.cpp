@@ -204,7 +204,8 @@ CPLEXInterface::Model::apply_start_solution()
 	IloNumVarArray startVar(this->interface->env);
 	IloNumArray startVal(this->interface->env);
 	for (auto & entry : this->start_values) {
-		startVar.add(this->interface->env.getExtractable(entry.first));
+		IloNumVar var((IloNumVarI*)this->interface->env.getExtractable(entry.first));
+		startVar.add(var);
 		startVal.add(entry.second);
 	}
 
@@ -242,8 +243,11 @@ CPLEXInterface::Model::solve()
 		case IloAlgorithm::Status::Unbounded:
 		case IloAlgorithm::Status::InfeasibleOrUnbounded:
 			this->status = ModelStatus::UNBOUNDED;
+			break;
 		default:
+			assert(false);
 		case IloAlgorithm::Status::Unknown:
+			assert(false);
 		case IloAlgorithm::Status::Error:
 			assert(false);
 	}
