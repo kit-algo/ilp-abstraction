@@ -125,6 +125,23 @@ public:
 		ASSERT_EQ(m.get_objective_value(), 30);
 	}
 
+	void test_changing_bounds() {
+		auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
+		                            10);
+		this->m.commit_variables();
+
+		auto obj = this->s.create_expression();
+		obj += var;
+		m.set_objective(obj, ObjectiveType::MAXIMIZE);
+
+		m.solve();
+		ASSERT_EQ(m.get_objective_value(), 10);
+
+		m.change_var_bounds(var, Solver::NEGATIVE_INFTY, 20);
+		m.solve();
+		ASSERT_EQ(m.get_objective_value(), 20);
+	}
+
 	BasicTest() : s(true), m(s.create_model()) {}
 	virtual ~BasicTest() {}
 
@@ -169,6 +186,13 @@ BasicTest<GurobiInterface> test_grb;
 test_grb.test_setting_start();
 BasicTest<CPLEXInterface> test_cplex;
 test_cplex.test_setting_start();
+}
+
+TEST(BasicTest, test_changing_bounds) {
+BasicTest<GurobiInterface> test_grb;
+test_grb.test_changing_bounds();
+BasicTest<CPLEXInterface> test_cplex;
+test_cplex.test_changing_bounds();
 }
 
 }

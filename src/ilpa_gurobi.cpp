@@ -163,6 +163,14 @@ GurobiInterface::Model::add_sos1_constraint(const std::vector<Variable> & vars,
 	}
 }
 
+template <class LowerValType, class UpperValType>
+void
+GurobiInterface::Model::change_var_bounds(Variable & var, LowerValType lower_bound,
+                                          UpperValType upper_bound)
+{
+	var.set(GRB_DoubleAttr_LB, grb_internal::get_value(lower_bound));
+	var.set(GRB_DoubleAttr_UB, grb_internal::get_value(upper_bound));
+}
 
 template <class LowerValType, class UpperValType>
 GurobiInterface::Variable

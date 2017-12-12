@@ -92,6 +92,10 @@ public:
 		template <class T>
 		void set_start(Variable & var, T val);
 
+		template <class LowerValType, class UpperValType>
+		void change_var_bounds(Variable & var, LowerValType lower_bound,
+		                       UpperValType upper_bound);
+
 		inline void write(const std::string & filename);
 		inline void write_solution(const std::string & filename);
 

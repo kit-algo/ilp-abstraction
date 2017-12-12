@@ -131,6 +131,7 @@ public:
 		Variable add_var(VariableType type, LowerValType lower_bound,
 		                 UpperValType upper_bound, std::string name = "") = delete;
 
+
 		inline void add_sos1_constraint(const std::vector<Variable> & vars,
 		                                const std::vector<double> & weights,
 		                                std::string name = "") = delete;
@@ -161,6 +162,10 @@ public:
 
 		template <class T>
 		void set_start(Variable & var, T val) = delete;
+
+		template <class LowerValType, class UpperValType>
+		void change_var_bounds(Variable & var, LowerValType lower_bound,
+		                       UpperValType upper_bound) = delete;
 
 	protected:
 		std::vector<CallbackBase<CallbackContext> *> cbs;

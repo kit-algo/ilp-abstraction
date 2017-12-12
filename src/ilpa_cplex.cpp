@@ -268,6 +268,17 @@ CPLEXInterface::Model::commit_variables()
 {} // nothing to do
 
 template <class LowerValType, class UpperValType>
+void
+CPLEXInterface::Model::change_var_bounds(Variable & var, LowerValType lower_bound,
+                                         UpperValType upper_bound)
+{
+	var.setLB(lower_bound);
+	var.setUB(upper_bound);
+
+	this->cplex_up_to_date = false;
+}
+
+template <class LowerValType, class UpperValType>
 CPLEXInterface::Variable
 CPLEXInterface::Model::add_var(VariableType type, LowerValType lower_bound,
                                UpperValType upper_bound, std::string name)
