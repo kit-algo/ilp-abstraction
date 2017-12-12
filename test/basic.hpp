@@ -125,7 +125,7 @@ public:
 		ASSERT_EQ(m.get_objective_value(), 30);
 	}
 
-	void test_changing_bounds() {
+	void test_changing_var_bounds() {
 		auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
 		                            10);
 		this->m.commit_variables();
@@ -140,6 +140,30 @@ public:
 		m.change_var_bounds(var, Solver::NEGATIVE_INFTY, 20);
 		m.solve();
 		ASSERT_EQ(m.get_objective_value(), 20);
+	}
+
+	void test_changing_constr_bounds() {
+		auto var1 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
+		                            Solver::INFTY);
+		auto var2 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
+		                            Solver::INFTY);
+		this->m.commit_variables();
+
+		m.add_constraint(0, var1, 10);
+		m.add_constraint(0, var2, 10);
+
+		auto constr = m.add_constraint(Solver::NEGATIVE_INFTY, var1 + var2, 10);
+
+		auto obj = this->s.create_expression();
+		obj += 2 * var1 + 3 * var2;
+		m.set_objective(obj, ObjectiveType::MAXIMIZE);
+
+		m.solve();
+		ASSERT_EQ(m.get_objective_value(), 30);
+
+		m.change_constraint_ub(constr, 20);
+		m.solve();
+		ASSERT_EQ(m.get_objective_value(), 50);
 	}
 
 	BasicTest() : s(true), m(s.create_model()) {}
@@ -188,11 +212,18 @@ BasicTest<CPLEXInterface> test_cplex;
 test_cplex.test_setting_start();
 }
 
-TEST(BasicTest, test_changing_bounds) {
+TEST(BasicTest, test_changing_var_bounds) {
 BasicTest<GurobiInterface> test_grb;
-test_grb.test_changing_bounds();
+test_grb.test_changing_var_bounds();
 BasicTest<CPLEXInterface> test_cplex;
-test_cplex.test_changing_bounds();
+test_cplex.test_changing_var_bounds();
+}
+
+TEST(BasicTest, test_changing_constr_bounds) {
+BasicTest<GurobiInterface> test_grb;
+test_grb.test_changing_constr_bounds();
+BasicTest<CPLEXInterface> test_cplex;
+test_cplex.test_changing_constr_bounds();
 }
 
 }

@@ -43,10 +43,14 @@ public:
 	using IloExpr::IloExpr;
 };
 
-class CPLEXInterface : public Interface<CPLEXVariable, CPLEXExpression, cplex_internal::CallbackContext>
+using CPLEXConstraint = std::pair<IloRange, IloRange>;
+
+class CPLEXInterface : public Interface<CPLEXVariable, CPLEXExpression, CPLEXConstraint,
+                                        cplex_internal::CallbackContext>
 {
 public:
-	using Base = Interface<CPLEXVariable, CPLEXExpression, cplex_internal::CallbackContext>;
+	using Base = Interface<CPLEXVariable, CPLEXExpression, CPLEXConstraint,
+	                       cplex_internal::CallbackContext>;
 	using Callback = Base::Callback;
 	using CallbackContext = Base::CallbackContext;
 
@@ -59,8 +63,8 @@ public:
 	{
 	public:
 		template <class LowerValType, class UpperValType>
-		inline void add_constraint(LowerValType lower_bound, Expression expr, UpperValType upper_bound,
-		                           std::string name = "");
+		inline Constraint add_constraint(LowerValType lower_bound, Expression expr,
+		                                 UpperValType upper_bound, std::string name = "");
 
 		template <class LowerValType, class UpperValType>
 		inline Variable add_var(VariableType type, LowerValType lower_bound,
@@ -95,7 +99,11 @@ public:
 		template <class LowerValType, class UpperValType>
 		void change_var_bounds(Variable & var, LowerValType lower_bound,
 		                       UpperValType upper_bound);
-
+		template <class UpperValType>
+		void change_constraint_ub(Constraint & constr, UpperValType upper_bound);
+		template <class LowerValType>
+		void change_constraint_lb(Constraint & constr, LowerValType lower_bound);
+		
 		inline void write(const std::string & filename);
 		inline void write_solution(const std::string & filename);
 

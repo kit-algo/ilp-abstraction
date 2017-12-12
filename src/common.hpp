@@ -101,7 +101,7 @@ protected:
 	}
 };
 
-template<class VariableT, class ExpressionT, class CContextT>
+template<class VariableT, class ExpressionT, class ConstraintT, class CContextT>
 class Interface {
 public:
 	enum class DummyValType
@@ -112,6 +112,7 @@ public:
 public:
 	using Expression = ExpressionT;
 	using Variable = VariableT;
+	using Constraint = ConstraintT;
 	using CallbackContext = CContextT;
 	using Callback = CallbackBase<CallbackContext>;
 
@@ -124,8 +125,9 @@ public:
 	{
 	public:
 		template <class LowerValType, class UpperValType>
-		void add_constraint(LowerValType lower_bound, Expression expr, UpperValType upper_bound,
-		                    std::string name = "") = delete;
+		Constraint add_constraint(LowerValType lower_bound, Expression expr, UpperValType upper_bound,
+		                          std::string name = "") = delete;
+
 
 		template <class LowerValType, class UpperValType>
 		Variable add_var(VariableType type, LowerValType lower_bound,
@@ -166,6 +168,12 @@ public:
 		template <class LowerValType, class UpperValType>
 		void change_var_bounds(Variable & var, LowerValType lower_bound,
 		                       UpperValType upper_bound) = delete;
+
+
+		template <class UpperValType>
+		void change_constraint_ub(Constraint & constr, UpperValType upper_bound);
+		template <class LowerValType>
+		void change_constraint_lb(Constraint & constr, LowerValType lower_bound);
 
 	protected:
 		std::vector<CallbackBase<CallbackContext> *> cbs;

@@ -267,6 +267,24 @@ void
 CPLEXInterface::Model::commit_variables()
 {} // nothing to do
 
+template <class UpperValType>
+void
+CPLEXInterface::Model::change_constraint_ub(Constraint & constr, UpperValType upper_bound)
+{
+	IloRange range = constr.second;
+	range.setUB(upper_bound);
+	this->cplex_up_to_date = false;
+}
+
+template <class LowerValType>
+void
+CPLEXInterface::Model::change_constraint_lb(Constraint & constr, LowerValType lower_bound)
+{
+	IloRange range = constr.first;
+	range.setLB(lower_bound);
+	this->cplex_up_to_date = false;
+}
+
 template <class LowerValType, class UpperValType>
 void
 CPLEXInterface::Model::change_var_bounds(Variable & var, LowerValType lower_bound,
@@ -307,18 +325,21 @@ CPLEXInterface::Model::add_var(VariableType type, LowerValType lower_bound,
 }
 
 template <class LowerValType, class UpperValType>
-void
+CPLEXInterface::Constraint
 CPLEXInterface::Model::add_constraint(LowerValType lower_bound, Expression expr,
                                       UpperValType upper_bound, std::string name)
 {
 	(void) name;
-	//IloRange constr(this->interface->env, lower_bound, expr, upper_bound);
-	//this->m.add(constr);
 
-	this->m.add(lower_bound <= expr);
-	this->m.add(expr <= upper_bound);
+	IloRange lower_constr = IloRange(this->interface->env, 0, expr - lower_bound, IloInfinity);
+	this->m.add(lower_constr);
+
+	IloRange upper_constr(this->interface->env, -1 * IloInfinity, expr - upper_bound, 0);
+	this->m.add(upper_constr);
 
 	this->cplex_up_to_date = false;
+
+	return {lower_constr, upper_constr};
 }
 
 void

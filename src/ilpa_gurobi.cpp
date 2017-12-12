@@ -127,7 +127,7 @@ GurobiInterface::Model::set_start(Variable & var, T val)
 }
 
 template <class LowerValType, class UpperValType>
-void
+GurobiInterface::Constraint
 GurobiInterface::Model::add_constraint(LowerValType lower_bound, Expression expr,
                                        UpperValType upper_bound, std::string name)
 {
@@ -138,8 +138,9 @@ GurobiInterface::Model::add_constraint(LowerValType lower_bound, Expression expr
 		upper_name = name + std::string("_upper");
 	}
 
-	add_lower_constraint(lower_bound, expr, lower_name);
-	add_upper_constraint(upper_bound, expr, upper_name);
+	GRBConstr lower_constr = add_lower_constraint(lower_bound, expr, lower_name);
+	GRBConstr upper_constr = add_upper_constraint(upper_bound, expr, upper_name);
+	return std::make_pair<GRBConstr, GRBConstr>(std::move(lower_constr), std::move(upper_constr));
 }
 
 void
@@ -161,6 +162,49 @@ GurobiInterface::Model::add_sos1_constraint(const std::vector<Variable> & vars,
 
 		this->m->addSOS(vars.data(), dummy_weights.data(), (int)vars.size(), GRB_SOS_TYPE1);
 	}
+}
+
+template <class UpperValType>
+void
+GurobiInterface::Model::change_constraint_ub(Constraint & constr, UpperValType upper_bound)
+{
+	GRBConstr grbconstr = constr.second;
+
+	auto sense = grbconstr.get(GRB_CharAttr_Sense);
+	int factor = 1;
+	switch (sense) {
+		case '<':
+			factor = 1;
+			break;
+		case '>':
+			factor = -1;
+			break;
+		default:
+			assert(false);
+	}
+	grbconstr.set(GRB_DoubleAttr_RHS, factor * grb_internal::get_value(upper_bound));
+}
+
+template <class LowerValType>
+void
+GurobiInterface::Model::change_constraint_lb(Constraint & constr, LowerValType lower_bound)
+{
+	GRBConstr grbconstr = constr.first;
+
+	auto sense = grbconstr.get(GRB_CharAttr_Sense);
+	int factor = 1;
+	switch (sense) {
+		case '<':
+			factor = -1;
+			break;
+		case '>':
+			factor = 1;
+			break;
+		default:
+			assert(false);
+	}
+
+	grbconstr.set(GRB_DoubleAttr_RHS, grb_internal::get_value(lower_bound));
 }
 
 template <class LowerValType, class UpperValType>
@@ -263,22 +307,22 @@ GurobiInterface::create_model()
 }
 
 template <class UpperValType>
-void
+GRBConstr
 GurobiInterface::Model::add_upper_constraint(
 				std::enable_if_t<std::is_arithmetic<UpperValType>::value> upper_bound,
 				Expression expr, std::string name)
 {
-	this->m->addConstr(upper_bound, GRB_GREATER_EQUAL, expr, name);
+	return this->m->addConstr(upper_bound, GRB_GREATER_EQUAL, expr, name);
 }
 
-void
+GRBConstr
 GurobiInterface::Model::add_upper_constraint(Expression upper_bound, Expression expr,
                                              std::string name)
 {
-	this->m->addConstr(upper_bound, GRB_GREATER_EQUAL, expr, name);
+	return this->m->addConstr(upper_bound, GRB_GREATER_EQUAL, expr, name);
 }
 
-void
+GRBConstr
 GurobiInterface::Model::add_upper_constraint(DummyValType upper_bound, Expression expr,
                                              std::string name)
 {
@@ -286,25 +330,26 @@ GurobiInterface::Model::add_upper_constraint(DummyValType upper_bound, Expressio
 	(void)expr;
 	(void)name;
 	assert(upper_bound == Interface::INFTY);
+	return GRBConstr();
 }
 
 template <class LowerValType>
-void
+GRBConstr
 GurobiInterface::Model::add_lower_constraint(
 				std::enable_if_t<std::is_arithmetic<LowerValType>::value> lower_bound,
 				Expression expr, std::string name)
 {
-	this->m->addConstr(lower_bound, GRB_LESS_EQUAL, expr, name);
+	return this->m->addConstr(lower_bound, GRB_LESS_EQUAL, expr, name);
 }
 
-void
+GRBConstr
 GurobiInterface::Model::add_lower_constraint(Expression lower_bound, Expression expr,
                                              std::string name)
 {
-	this->m->addConstr(lower_bound, GRB_LESS_EQUAL, expr, name);
+	return this->m->addConstr(lower_bound, GRB_LESS_EQUAL, expr, name);
 }
 
-void
+GRBConstr
 GurobiInterface::Model::add_lower_constraint(DummyValType lower_bound, Expression expr,
                                              std::string name)
 {
@@ -312,6 +357,7 @@ GurobiInterface::Model::add_lower_constraint(DummyValType lower_bound, Expressio
 	(void)expr;
 	(void)name;
 	assert(lower_bound == Base::NEGATIVE_INFTY);
+	return GRBConstr();
 }
 
 double
