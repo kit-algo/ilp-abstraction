@@ -256,9 +256,13 @@ CPLEXInterface::Model::solve()
 void
 CPLEXInterface::Model::set_objective(Expression expr, ObjectiveType type)
 {
+	if (this->objective.getImpl() != nullptr) {
+		this->objective.removeFromAll();
+	}
+	
 	auto sense = (type == ObjectiveType::MAXIMIZE) ? IloObjective::Maximize : IloObjective::Minimize;
-	IloObjective obj(this->interface->env, expr, sense);
-	this->m.add(obj);
+	this->objective = IloObjective(this->interface->env, expr, sense);
+	this->m.add(this->objective);
 
 	this->cplex_up_to_date = false;
 }
@@ -292,6 +296,14 @@ CPLEXInterface::Model::change_var_bounds(Variable & var, LowerValType lower_boun
 {
 	var.setLB(lower_bound);
 	var.setUB(upper_bound);
+
+	this->cplex_up_to_date = false;
+}
+
+void
+CPLEXInterface::Model::change_objective_coefficient(Variable &var, double coefficient)
+{
+	this->objective.setLinearCoef(var, coefficient);
 
 	this->cplex_up_to_date = false;
 }

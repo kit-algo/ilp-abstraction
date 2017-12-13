@@ -166,6 +166,23 @@ public:
 		ASSERT_EQ(m.get_objective_value(), 50);
 	}
 
+	void test_changing_obj_coeff() {
+		auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
+		                           10);
+		this->m.commit_variables();
+
+		auto obj = this->s.create_expression();
+		obj += var;
+		m.set_objective(obj, ObjectiveType::MAXIMIZE);
+
+		m.solve();
+		ASSERT_EQ(m.get_objective_value(), 10);
+
+		m.change_objective_coefficient(var, 4);
+		m.solve();
+		ASSERT_EQ(m.get_objective_value(), 40);
+	}
+
 	BasicTest() : s(true), m(s.create_model()) {}
 	virtual ~BasicTest() {}
 
@@ -224,6 +241,13 @@ BasicTest<GurobiInterface> test_grb;
 test_grb.test_changing_constr_bounds();
 BasicTest<CPLEXInterface> test_cplex;
 test_cplex.test_changing_constr_bounds();
+}
+
+TEST(BasicTest, test_changing_obj_coeff) {
+BasicTest<GurobiInterface> test_grb;
+test_grb.test_changing_obj_coeff();
+BasicTest<CPLEXInterface> test_cplex;
+test_cplex.test_changing_obj_coeff();
 }
 
 }

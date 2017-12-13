@@ -185,6 +185,12 @@ GurobiInterface::Model::change_constraint_ub(Constraint & constr, UpperValType u
 	grbconstr.set(GRB_DoubleAttr_RHS, factor * grb_internal::get_value(upper_bound));
 }
 
+void
+GurobiInterface::Model::change_objective_coefficient(Variable &var, double coefficient)
+{
+	var.set(GRB_DoubleAttr_Obj, coefficient);
+}
+
 template <class LowerValType>
 void
 GurobiInterface::Model::change_constraint_lb(Constraint & constr, LowerValType lower_bound)

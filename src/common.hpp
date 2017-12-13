@@ -171,9 +171,11 @@ public:
 
 
 		template <class UpperValType>
-		void change_constraint_ub(Constraint & constr, UpperValType upper_bound);
+		void change_constraint_ub(Constraint & constr, UpperValType upper_bound) = delete;
 		template <class LowerValType>
-		void change_constraint_lb(Constraint & constr, LowerValType lower_bound);
+		void change_constraint_lb(Constraint & constr, LowerValType lower_bound) = delete;
+
+		void change_objective_coefficient(Variable & var, double coefficient) = delete;
 
 	protected:
 		std::vector<CallbackBase<CallbackContext> *> cbs;
