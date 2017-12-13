@@ -104,7 +104,7 @@ public:
 		template <class LowerValType>
 		void change_constraint_lb(Constraint & constr, LowerValType lower_bound);
 
-		void change_objective_coefficient(Variable & var, double coefficient);
+		inline void change_objective_coefficient(Variable & var, double coefficient);
 
 		inline void write(const std::string & filename);
 		inline void write_solution(const std::string & filename);

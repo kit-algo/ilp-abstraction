@@ -259,7 +259,7 @@ CPLEXInterface::Model::set_objective(Expression expr, ObjectiveType type)
 	if (this->objective.getImpl() != nullptr) {
 		this->objective.removeFromAll();
 	}
-	
+
 	auto sense = (type == ObjectiveType::MAXIMIZE) ? IloObjective::Maximize : IloObjective::Minimize;
 	this->objective = IloObjective(this->interface->env, expr, sense);
 	this->m.add(this->objective);
