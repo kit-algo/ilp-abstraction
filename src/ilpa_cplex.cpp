@@ -25,6 +25,9 @@ namespace cplex_internal {
 			case ParamType::SEED:
 				cplex.setParam(IloCplex::Param::RandomSeed, val);
 				break;
+			case ParamType::THREADS:
+				cplex.setParam(IloCplex::Param::Threads, val);
+				break;
 			default:
 				assert(false);
 		}

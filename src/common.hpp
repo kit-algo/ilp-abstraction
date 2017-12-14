@@ -13,7 +13,8 @@ enum class ParamType
 {
 	LOG_TO_CONSOLE,
 	SEED,
-	TIME_LIMIT
+	TIME_LIMIT,
+	THREADS
 };
 
 

@@ -84,6 +84,9 @@ set_param_on_env(GRBEnv env, ParamType type, T val)
 		case ParamType::SEED:
 			env.set(GRB_IntParam_Seed, val);
 			break;
+		case ParamType::THREADS:
+			env.set(GRB_IntParam_Threads, val);
+			break;
 		default:
 			assert(false);
 	}
