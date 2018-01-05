@@ -108,11 +108,11 @@ operator!=(const GurobiInterface::DummyValType &lhs, const T &rhs)
 	return !(lhs == rhs);
 }
 
-template <class T>
+template <class SolverParamType, class T>
 void
-GurobiInterface::set_param(ParamType type, T val)
+GurobiInterface::Model::set_param_passthrough(SolverParamType type, T val)
 {
-	grb_internal::set_param_on_env(*this->env, type, val);
+	this->m->getEnv().set(type, val);
 }
 
 template <class T>

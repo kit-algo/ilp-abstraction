@@ -99,6 +99,13 @@ CPLEXInterface::Model::set_param(ParamType type, T val)
 	cplex_internal::set_param_on_cplex(this->cplex, type, val);
 }
 
+template <class SolverParamType, class T>
+void
+CPLEXInterface::Model::set_param_passthrough(SolverParamType type, T val)
+{
+	this->cplex.setParam(type, val);
+}
+
 template<class T>
 void
 CPLEXInterface::Model::set_start(Variable & var, T val)

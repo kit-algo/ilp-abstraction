@@ -163,6 +163,9 @@ public:
 		template <class T>
 		void set_param(ParamType type, T val) = delete;
 
+		template <class SolverParamType, class T>
+		void set_param_passthrough(SolverParamType type, T val) = delete;
+
 		template <class T>
 		void set_start(Variable & var, T val) = delete;
 
@@ -185,9 +188,6 @@ public:
 	Interface(bool auto_commit_variables_in)
 	  : auto_commit_variables(auto_commit_variables_in)
 	{}
-
-	template <class T>
-	void set_param(ParamType type, T val) = delete;
 
 	Model create_model() = delete;
 

@@ -4,6 +4,7 @@
 #include "../src/ilpa_cplex.hpp"
 
 #include "basic.hpp"
+#include "param_passthrough.hpp"
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

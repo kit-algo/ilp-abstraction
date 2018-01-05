@@ -90,6 +90,9 @@ public:
 		template <class T>
 		void set_param(ParamType type, T val);
 
+		template <class SolverParamType, class T>
+		void set_param_passthrough(SolverParamType type, T val);
+
 		template <class T>
 		void set_start(Variable & var, T val);
 
@@ -153,9 +156,6 @@ public:
 	};
 
 	inline GurobiInterface(bool auto_commit_variables);
-
-	template <class T>
-	void set_param(ParamType type, T val);
 
 	inline Model create_model();
 
