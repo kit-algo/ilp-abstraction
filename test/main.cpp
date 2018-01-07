@@ -5,6 +5,7 @@
 
 #include "basic.hpp"
 #include "param_passthrough.hpp"
+#include "cplex_kinks.hpp"
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

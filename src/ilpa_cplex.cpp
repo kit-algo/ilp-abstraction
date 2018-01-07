@@ -23,7 +23,7 @@ namespace cplex_internal {
 				cplex.setParam(IloCplex::Param::TimeLimit, val);
 				break;
 			case ParamType::SEED:
-				cplex.setParam(IloCplex::Param::RandomSeed, val);
+				cplex.setParam(IloCplex::Param::RandomSeed, val % CPX_BIGINT);
 				break;
 			case ParamType::THREADS:
 				cplex.setParam(IloCplex::Param::Threads, val);
