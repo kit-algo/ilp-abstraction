@@ -95,7 +95,7 @@ set_param_on_env(GRBEnv env, ParamType type, T val)
 }
 
 template <>
-void
+inline void
 set_param_on_env<ParamMIPFocus>(GRBEnv env, ParamType type, ParamMIPFocus val)
 {
 	assert(type == ParamType::MIP_FOCUS);

@@ -8,7 +8,8 @@ namespace ilpabstraction {
 
 namespace cplex_internal {
 	template <class T>
-	void set_param_on_cplex(IloCplex & cplex, ParamType type, T val) {
+	void
+	set_param_on_cplex(IloCplex & cplex, ParamType type, T val) {
 		switch(type) {
 			case ParamType::LOG_TO_CONSOLE:
 				if (val) {
@@ -40,7 +41,8 @@ namespace cplex_internal {
 	}
 
 	template<>
-	void set_param_on_cplex<ParamMIPFocus>(IloCplex & cplex, ParamType type, ParamMIPFocus val) {
+	inline void
+	set_param_on_cplex<ParamMIPFocus>(IloCplex & cplex, ParamType type, ParamMIPFocus val) {
 		assert(type == ParamType::MIP_FOCUS);
 
 		switch (val) {
