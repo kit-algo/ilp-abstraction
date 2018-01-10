@@ -87,6 +87,32 @@ set_param_on_env(GRBEnv env, ParamType type, T val)
 		case ParamType::THREADS:
 			env.set(GRB_IntParam_Threads, val);
 			break;
+		case ParamType::MIP_FOCUS:
+			assert(false);
+		default:
+			assert(false);
+	}
+}
+
+template <>
+void
+set_param_on_env<ParamMIPFocus>(GRBEnv env, ParamType type, ParamMIPFocus val)
+{
+	assert(type == ParamType::MIP_FOCUS);
+
+	switch (val) {
+		case ParamMIPFocus::BALANCED:
+			env.set(GRB_IntParam_MIPFocus, 0);
+			break;
+		case ParamMIPFocus::OPTIMALITY:
+			env.set(GRB_IntParam_MIPFocus, 2);
+			break;
+		case ParamMIPFocus::QUALITY:
+			env.set(GRB_IntParam_MIPFocus, 1);
+			break;
+		case ParamMIPFocus::BOUND:
+			env.set(GRB_IntParam_MIPFocus, 3);
+			break;
 		default:
 			assert(false);
 	}

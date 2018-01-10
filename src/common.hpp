@@ -9,12 +9,21 @@
 
 namespace ilpabstraction {
 
+enum class ParamMIPFocus
+{
+	BALANCED,
+	QUALITY,
+	BOUND,
+	OPTIMALITY
+};
+
 enum class ParamType
 {
 	LOG_TO_CONSOLE,
 	SEED,
 	TIME_LIMIT,
-	THREADS
+	THREADS,
+	MIP_FOCUS
 };
 
 

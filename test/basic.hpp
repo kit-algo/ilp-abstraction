@@ -31,6 +31,10 @@ public:
 		ASSERT_EQ(m.get_objective_value(), 10);
 	}
 
+	void test_setting_focus() {
+		m.set_param(ParamType::MIP_FOCUS, ParamMIPFocus::QUALITY);
+	}
+
 	void test_write(const std::string & suffix) {
 		auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
 		                           Solver::INFTY);

@@ -20,13 +20,41 @@ namespace cplex_internal {
 				}
 				break;
 			case ParamType::TIME_LIMIT:
-				cplex.setParam(IloCplex::Param::TimeLimit, val);
+				if (val > (unsigned long)std::numeric_limits<double>::max()) {
+					cplex.setParam(IloCplex::Param::TimeLimit, std::numeric_limits<double>::max());
+				} else {
+					cplex.setParam(IloCplex::Param::TimeLimit, (double)val);
+				}
 				break;
 			case ParamType::SEED:
-				cplex.setParam(IloCplex::Param::RandomSeed, val % CPX_BIGINT);
+				cplex.setParam(IloCplex::Param::RandomSeed, (int)(val % CPX_BIGINT));
 				break;
 			case ParamType::THREADS:
-				cplex.setParam(IloCplex::Param::Threads, val);
+				cplex.setParam(IloCplex::Param::Threads, (int)val);
+				break;
+			case ParamType::MIP_FOCUS:
+				assert(false); // handled by specialization
+			default:
+				assert(false);
+		}
+	}
+
+	template<>
+	void set_param_on_cplex<ParamMIPFocus>(IloCplex & cplex, ParamType type, ParamMIPFocus val) {
+		assert(type == ParamType::MIP_FOCUS);
+
+		switch (val) {
+			case ParamMIPFocus::BALANCED:
+				cplex.setParam(IloCplex::Param::Emphasis::MIP, CPX_MIPEMPHASIS_BALANCED);
+				break;
+			case ParamMIPFocus::OPTIMALITY:
+				cplex.setParam(IloCplex::Param::Emphasis::MIP, CPX_MIPEMPHASIS_OPTIMALITY);
+				break;
+			case ParamMIPFocus::QUALITY:
+				cplex.setParam(IloCplex::Param::Emphasis::MIP, CPX_MIPEMPHASIS_FEASIBILITY);
+				break;
+			case ParamMIPFocus::BOUND:
+				cplex.setParam(IloCplex::Param::Emphasis::MIP, CPX_MIPEMPHASIS_BESTBOUND);
 				break;
 			default:
 				assert(false);
