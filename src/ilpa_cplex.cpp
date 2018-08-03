@@ -122,6 +122,28 @@ CPLEXInterface::Model::~Model()
 	this->m.end();
 }
 
+/* Begin Kappa Stats */
+void
+CPLEXInterface::Model::enable_kappa_statistics()
+{
+	this->cplex.setParam(IloCplex::Param::MIP::Strategy::KappaStats, 1); // TODO make 1 or 2 configurable
+}
+
+CPLEXInterface::Model::KappaStats
+CPLEXInterface::Model::kappa_stats()
+{
+	double stable = this->cplex.getQuality(IloCplex::Quality::KappaStable, -1);
+	double suspicious = this->cplex.getQuality(IloCplex::Quality::KappaSuspicious, -1);
+	double unstable = this->cplex.getQuality(IloCplex::Quality::KappaUnstable, -1);
+	double illposed = this->cplex.getQuality(IloCplex::Quality::KappaIllposed, -1);
+	double kappamax = this->cplex.getQuality(IloCplex::Quality::KappaMax, -1);
+	double attention = this->cplex.getQuality(IloCplex::Quality::KappaAttention, -1);
+
+	return {stable, suspicious, unstable, illposed, kappamax, attention};
+}
+
+/* End Kappa Stats */
+
 template<class T>
 void
 CPLEXInterface::Model::set_param(ParamType type, T val)

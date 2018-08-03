@@ -159,6 +159,10 @@ public:
 
 	inline Model create_model();
 
+	static constexpr auto features() {
+		return Features::FeatureList<>{};
+	}
+
 protected:
 	GRBEnv *env;
 };

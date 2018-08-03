@@ -115,6 +115,19 @@ public:
 		IloObjective objective;
 
 		inline ~Model();
+
+		/* Kappa Statistics */
+		struct KappaStats {
+			double stable;
+			double suspicious;
+			double unstable;
+			double illposed;
+			double kappamax;
+			double attention;
+		};
+		inline void enable_kappa_statistics();
+		inline KappaStats kappa_stats();
+
 	protected:
 
 		class CallbackAdapter : public IloCplex::MIPInfoCallbackI {
@@ -155,6 +168,10 @@ public:
 	inline Model create_model();
 	inline Expression create_expression();
 	inline Variable create_variable();
+
+	static constexpr auto features() {
+		return Features::FeatureList<Features::KAPPPA_STATS>{};
+	}
 
 private:
 	IloEnv env;

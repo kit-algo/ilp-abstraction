@@ -105,6 +105,32 @@ public:
 		ASSERT_EQ(m.get_objective_value(), 20);
 	}
 
+	void test_kappa_stats() {
+		if constexpr (this->s.features().template has_feature<Features::KAPPPA_STATS>()) {
+			/* Create Model */
+			auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
+			                           Solver::INFTY);
+			auto var2 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
+			                           Solver::INFTY);
+			this->m.commit_variables();
+			auto expr = this->s.create_expression();
+			expr += var;
+			m.add_constraint(0, var, 10);
+			m.add_constraint(0, expr, 20);
+			m.add_constraint(0u, expr, 20u);
+			m.add_constraint(0.5, expr, 20.5);
+			m.add_constraint(expr, var2, Solver::INFTY);
+			auto obj = this->s.create_expression();
+
+			m.enable_kappa_statistics();
+
+			m.solve();
+
+			auto stats = m.kappa_stats();
+			ASSERT_TRUE(stats.stable > 0);
+		}
+	}
+
 	void test_setting_start() {
 		auto var1 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
 		                           Solver::INFTY);
@@ -217,6 +243,13 @@ BasicTest<GurobiInterface> test_grb;
 test_grb.test_math_ops();
 BasicTest<CPLEXInterface> test_cplex;
 test_cplex.test_math_ops();
+}
+
+TEST(BasicTest, test_kappa_stats) {
+BasicTest<GurobiInterface> test_grb;
+test_grb.test_kappa_stats();
+BasicTest<CPLEXInterface> test_cplex;
+test_cplex.test_kappa_stats();
 }
 
 TEST(BasicTest, test_write) {

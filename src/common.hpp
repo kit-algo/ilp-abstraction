@@ -9,6 +9,34 @@
 
 namespace ilpabstraction {
 
+namespace util {
+	template <typename T, typename ... Args>
+	struct has_type;
+
+	template <typename T>
+	struct has_type<T> : std::false_type {};
+
+	template <typename T, typename U, typename... Ts>
+	struct has_type<T, U, Ts...> : has_type<T, std::tuple<Ts...>> {};
+
+	template <typename T, typename... Ts>
+	struct has_type<T, T, Ts...> : std::true_type {};
+}
+
+class Features {
+public:
+	class KAPPPA_STATS {};
+
+	template<class ... Flags>
+	class FeatureList {
+	public:
+		template<class Flag>
+		constexpr bool has_feature() {
+			return util::has_type<Flag, Flags...>{};
+		}
+	};
+};
+
 enum class ParamMIPFocus
 {
 	BALANCED,
@@ -25,7 +53,6 @@ enum class ParamType
 	THREADS,
 	MIP_FOCUS
 };
-
 
 enum class AttributeType
 {
@@ -55,6 +82,11 @@ enum class ModelStatus
 	INFEASIBLE,
 	UNBOUNDED,
 	STOPPED
+};
+
+enum class QualityMetrics
+{
+	KAPPA
 };
 
 template<class ContextT>
