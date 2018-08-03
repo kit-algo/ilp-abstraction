@@ -170,7 +170,7 @@ public:
 	inline Variable create_variable();
 
 	static constexpr auto features() {
-		return Features::FeatureList<Features::KAPPPA_STATS>{};
+		return Features::FeatureList<Features::KAPPA_STATS>{};
 	}
 
 private:

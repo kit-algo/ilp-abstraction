@@ -106,7 +106,7 @@ public:
 	}
 
 	void test_kappa_stats() {
-		if constexpr (this->s.features().template has_feature<Features::KAPPPA_STATS>()) {
+		if constexpr (this->s.features().template has_feature<Features::KAPPA_STATS>()) {
 			/* Create Model */
 			auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
 			                           Solver::INFTY);

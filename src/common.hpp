@@ -25,7 +25,7 @@ namespace util {
 
 class Features {
 public:
-	class KAPPPA_STATS {};
+	class KAPPA_STATS {};
 
 	template<class ... Flags>
 	class FeatureList {
