@@ -21,8 +21,8 @@ namespace cplex_internal {
 				}
 				break;
 			case ParamType::TIME_LIMIT:
-				if (val > (unsigned long)std::numeric_limits<double>::max()) {
-					cplex.setParam(IloCplex::Param::TimeLimit, std::numeric_limits<double>::max());
+				if (((double)val < 0.0) || ((double)val > 1e+75)) {
+					cplex.setParam(IloCplex::Param::TimeLimit, 1e+75);
 				} else {
 					cplex.setParam(IloCplex::Param::TimeLimit, (double)val);
 				}
