@@ -35,6 +35,26 @@ namespace cplex_internal {
 				break;
 			case ParamType::MIP_FOCUS:
 				assert(false); // handled by specialization
+				break;
+			case ParamType::NODE_FILE_DIR:
+				assert(false);
+				break;
+			case ParamType::NODE_FILE_START:
+				cplex.setParam(IloCplex::Param::MIP::Strategy::File, 3); // write node files on disk and compressed
+				cplex.setParam(IloCplex::Param::WorkMem, 1024 * (double) val); // conversion to megabytes
+				break;
+			default:
+				assert(false);
+		}
+	}
+
+	template<>
+	inline void
+	set_param_on_cplex<const char*>(IloCplex & cplex, ParamType type, const char* val) {
+		switch(type) {
+			case ParamType::NODE_FILE_DIR:
+				cplex.setParam(IloCplex::Param::WorkDir, val);
+				break;
 			default:
 				assert(false);
 		}

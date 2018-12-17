@@ -89,6 +89,25 @@ set_param_on_env(GRBEnv env, ParamType type, T val)
 			break;
 		case ParamType::MIP_FOCUS:
 			assert(false);
+			break;
+		case ParamType::NODE_FILE_DIR:
+			assert(false);
+			break;
+		case ParamType::NODE_FILE_START:
+			env.set(GRB_DoubleParam_NodefileStart, val ); // in GB
+			break;
+		default:
+			assert(false);
+	}
+}
+
+template<>
+inline void
+set_param_on_env<const char*>(GRBEnv env, ParamType type, const char* val) {
+	switch(type) {
+		case ParamType::NODE_FILE_DIR:
+			env.set(GRB_StringParam_NodefileDir, val );
+			break;
 		default:
 			assert(false);
 	}

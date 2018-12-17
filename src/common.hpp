@@ -51,7 +51,10 @@ enum class ParamType
 	SEED,
 	TIME_LIMIT,
 	THREADS,
-	MIP_FOCUS
+	MIP_FOCUS,
+	// write compressed node files to disk 
+	NODE_FILE_DIR, // specify directory for node files
+	NODE_FILE_START // specify limit to in-set memory for node files (in GB)
 };
 
 enum class AttributeType
