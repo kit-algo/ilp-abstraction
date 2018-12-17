@@ -28,7 +28,7 @@ namespace cplex_internal {
 				}
 				break;
 			case ParamType::SEED:
-				cplex.setParam(IloCplex::Param::RandomSeed, (int)(val % CPX_BIGINT));
+				cplex.setParam(IloCplex::Param::RandomSeed, (int)( (int) val % CPX_BIGINT));
 				break;
 			case ParamType::THREADS:
 				cplex.setParam(IloCplex::Param::Threads, (int)val);
