@@ -1,7 +1,3 @@
-//
-// Created by lukas on 24.08.17.
-//
-
 #ifndef ILP_ABSTRACTION_CPLEX_HPP
 #define ILP_ABSTRACTION_CPLEX_HPP
 
@@ -14,26 +10,28 @@
 namespace ilpabstraction {
 
 namespace cplex_internal {
-	class CallbackContext {
-	public:
-		inline CallbackContext(IloCplex::MIPInfoCallbackI * cplex_cb);
-		inline double get_objective_value() const;
-		inline double get_bound() const;
-		inline double get_gap() const;
-		inline double get_time() const;
-		inline int get_processed_nodes() const;
-		inline int get_open_nodes() const;
+class CallbackContext {
+public:
+	inline CallbackContext(IloCplex::MIPInfoCallbackI * cplex_cb);
+	inline double get_objective_value() const;
+	inline double get_bound() const;
+	inline double get_gap() const;
+	inline double get_time() const;
+	inline int get_processed_nodes() const;
+	inline int get_open_nodes() const;
 
-	private:
-		IloCplex::MIPInfoCallbackI * cplex_cb;
-	};
+private:
+	IloCplex::MIPInfoCallbackI * cplex_cb;
+};
 } // namespace cplex_internal
 
 class CPLEXVariable : public IloNumVar {
 public:
 	using IloNumVar::IloNumVar;
 
-	bool operator==(const CPLEXVariable & other) const {
+	bool
+	operator==(const CPLEXVariable & other) const
+	{
 		return other.getId() == this->getId();
 	}
 };
@@ -45,9 +43,9 @@ public:
 
 using CPLEXConstraint = std::pair<IloRange, IloRange>;
 
-class CPLEXInterface : public Interface<CPLEXVariable, CPLEXExpression, CPLEXConstraint,
-                                        cplex_internal::CallbackContext>
-{
+class CPLEXInterface
+    : public Interface<CPLEXVariable, CPLEXExpression, CPLEXConstraint,
+                       cplex_internal::CallbackContext> {
 public:
 	using Base = Interface<CPLEXVariable, CPLEXExpression, CPLEXConstraint,
 	                       cplex_internal::CallbackContext>;
@@ -59,19 +57,20 @@ public:
 	static constexpr const auto INFTY = +IloInfinity;
 	static constexpr const auto NEGATIVE_INFTY = -IloInfinity;
 
-	class Model : public Base::Model
-	{
+	class Model : public Base::Model {
 	public:
 		template <class LowerValType, class UpperValType>
 		inline Constraint add_constraint(LowerValType lower_bound, Expression expr,
-		                                 UpperValType upper_bound, std::string name = "");
+		                                 UpperValType upper_bound,
+		                                 std::string name = "");
 
 		template <class LowerValType, class UpperValType>
 		inline Variable add_var(VariableType type, LowerValType lower_bound,
 		                        UpperValType upper_bound, std::string name = "");
 
 		inline void add_sos1_constraint(const std::vector<Variable> & vars,
-		                                const std::vector<double> & weights, std::string name = "");
+		                                const std::vector<double> & weights,
+		                                std::string name = "");
 
 		inline void commit_variables();
 
@@ -79,7 +78,7 @@ public:
 
 		inline void solve();
 
-		inline double get_variable_assignment(const Variable &var) const;
+		inline double get_variable_assignment(const Variable & var) const;
 		inline double get_objective_value() const;
 		inline double get_bound() const;
 
@@ -107,7 +106,8 @@ public:
 		template <class LowerValType>
 		void change_constraint_lb(Constraint & constr, LowerValType lower_bound);
 
-		inline void change_objective_coefficient(Variable & var, double coefficient);
+		inline void change_objective_coefficient(Variable & var,
+		                                         double coefficient);
 
 		inline void write(const std::string & filename);
 		inline void write_solution(const std::string & filename);
@@ -117,7 +117,8 @@ public:
 		inline ~Model();
 
 		/* Kappa Statistics */
-		struct KappaStats {
+		struct KappaStats
+		{
 			double stable;
 			double suspicious;
 			double unstable;
@@ -129,22 +130,23 @@ public:
 		inline KappaStats kappa_stats();
 
 	protected:
-
 		class CallbackAdapter : public IloCplex::MIPInfoCallbackI {
 		public:
 			inline static IloCplex::Callback create(IloEnv env, Model * model);
 			inline virtual IloCplex::CallbackI * duplicateCallback() const override;
+
 		protected:
 			inline virtual void main() override;
+
 		private:
 			inline CallbackAdapter(IloEnv env, Model * model);
 
 			Model * model;
 		};
 
-		inline Model(CPLEXInterface *interface);
+		inline Model(CPLEXInterface * interface);
 
-		CPLEXInterface *interface;
+		CPLEXInterface * interface;
 		IloCplex::Callback cba;
 
 		friend class CPLEXInterface;
@@ -169,7 +171,9 @@ public:
 	inline Expression create_expression();
 	inline Variable create_variable();
 
-	static constexpr auto features() {
+	static constexpr auto
+	features()
+	{
 		return Features::FeatureList<Features::KAPPA_STATS>{};
 	}
 
@@ -179,61 +183,77 @@ private:
 
 } // namespace ilpabstraction
 
-inline auto operator* (ilpabstraction::CPLEXVariable & var, unsigned int i) {
+inline auto operator*(ilpabstraction::CPLEXVariable & var, unsigned int i)
+{
 	assert(i <= std::numeric_limits<int>::max());
 	return (IloNumVar)var * (int)i;
 }
-inline auto operator* (unsigned int i, ilpabstraction::CPLEXVariable & var) {
+inline auto operator*(unsigned int i, ilpabstraction::CPLEXVariable & var)
+{
 	assert(i <= std::numeric_limits<int>::max());
 	return (IloNumVar)var * (int)i;
 }
-inline auto operator* (ilpabstraction::CPLEXVariable & var, int i) {
+inline auto operator*(ilpabstraction::CPLEXVariable & var, int i)
+{
 	assert(i <= std::numeric_limits<int>::max());
 	return (IloNumVar)var * i;
 }
-inline auto operator* (int i, ilpabstraction::CPLEXVariable & var) {
+inline auto operator*(int i, ilpabstraction::CPLEXVariable & var)
+{
 	return (IloNumVar)var * i;
 }
-inline auto operator* (ilpabstraction::CPLEXVariable & var, double d) {
+inline auto operator*(ilpabstraction::CPLEXVariable & var, double d)
+{
 	return (IloNumVar)var * d;
 }
-inline auto operator* (double d, ilpabstraction::CPLEXVariable & var) {
+inline auto operator*(double d, ilpabstraction::CPLEXVariable & var)
+{
 	return (IloNumVar)var * d;
 }
 
-inline auto operator* (unsigned int i, ilpabstraction::CPLEXExpression & expr) {
+inline auto operator*(unsigned int i, ilpabstraction::CPLEXExpression & expr)
+{
 	assert(i <= std::numeric_limits<int>::max());
 	return (IloExpr)expr * (int)i;
 }
-inline auto operator* (ilpabstraction::CPLEXExpression & expr, unsigned int i) {
+inline auto operator*(ilpabstraction::CPLEXExpression & expr, unsigned int i)
+{
 	assert(i <= std::numeric_limits<int>::max());
 	return (IloExpr)expr * (int)i;
 }
-inline auto operator* (double d, ilpabstraction::CPLEXExpression & expr) {
+inline auto operator*(double d, ilpabstraction::CPLEXExpression & expr)
+{
 	return (IloExpr)expr * d;
 }
-inline auto operator* (ilpabstraction::CPLEXExpression & expr, double d) {
+inline auto operator*(ilpabstraction::CPLEXExpression & expr, double d)
+{
 	return (IloExpr)expr * d;
 }
 
-inline auto operator* (unsigned int i, const IloNumLinExprTerm & expr) {
+inline auto operator*(unsigned int i, const IloNumLinExprTerm & expr)
+{
 	assert(i <= std::numeric_limits<int>::max());
 	return expr * (int)i;
 }
-inline auto  operator* (const IloNumLinExprTerm & expr, unsigned int i) {
+inline auto operator*(const IloNumLinExprTerm & expr, unsigned int i)
+{
 	assert(i <= std::numeric_limits<int>::max());
 	return expr * (int)i;
 }
 
-inline auto operator<= (unsigned int i, const IloNumExprArg & expr) {
+inline auto
+operator<=(unsigned int i, const IloNumExprArg & expr)
+{
 	assert(i <= std::numeric_limits<int>::max());
 	return (int)i <= expr;
 }
-inline auto operator<= (const IloNumExprArg & expr, unsigned int i) {
+inline auto
+operator<=(const IloNumExprArg & expr, unsigned int i)
+{
 	assert(i <= std::numeric_limits<int>::max());
-	return expr <= (int)i ;
+	return expr <= (int)i;
 }
 
 #include "ilpa_cplex.cpp"
 
-#endif //ILP_ABSTRACTION_CPLEX_HPP
+#endif // ILP_ABSTRACTION_CPLEX_HPP
