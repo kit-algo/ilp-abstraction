@@ -1,7 +1,3 @@
-//
-// Created by lukas on 07.01.18.
-//
-
 #ifndef ILP_ABSTRACTION_CPLEX_KINKS_HPP
 #define ILP_ABSTRACTION_CPLEX_KINKS_HPP
 

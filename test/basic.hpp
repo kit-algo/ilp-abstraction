@@ -1,21 +1,19 @@
-//
-// Created by lukas on 12.10.17.
-//
-
 #ifndef ILP_ABSTRACTION_BASIC_HPP
 #define ILP_ABSTRACTION_BASIC_HPP
 
 namespace ilpabstraction {
 namespace testing {
 
-template<class Solver>
+template <class Solver>
 class BasicTest {
 public:
 	using Variable = typename Solver::Variable;
 	using Expression = typename Solver::Expression;
 	using Model = typename Solver::Model;
 
-	void test_minimal() {
+	void
+	test_minimal()
+	{
 		auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
 		                           Solver::INFTY);
 		this->m.commit_variables();
@@ -31,11 +29,15 @@ public:
 		ASSERT_EQ(m.get_objective_value(), 10);
 	}
 
-	void test_setting_focus() {
+	void
+	test_setting_focus()
+	{
 		m.set_param(ParamType::MIP_FOCUS, ParamMIPFocus::QUALITY);
 	}
 
-	void test_write(const std::string & suffix) {
+	void
+	test_write(const std::string & suffix)
+	{
 		auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
 		                           Solver::INFTY);
 		this->m.commit_variables();
@@ -53,19 +55,21 @@ public:
 		m.write_solution(std::string("/tmp/test_") + suffix);
 	}
 
-	void test_math_ops() {
+	void
+	test_math_ops()
+	{
 		auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
 		                           Solver::INFTY);
 		auto var2 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
-		                           Solver::INFTY);
+		                            Solver::INFTY);
 		this->m.commit_variables();
 
 		auto expr = this->s.create_expression();
 		expr += var;
 
-		m.add_constraint(0, var, 10);  // variable vs integer
-		m.add_constraint(0, expr, 20); // expression vs integer;
-		m.add_constraint(0u, expr, 20u); // expression vs unsigned integer;
+		m.add_constraint(0, var, 10);      // variable vs integer
+		m.add_constraint(0, expr, 20);     // expression vs integer;
+		m.add_constraint(0u, expr, 20u);   // expression vs unsigned integer;
 		m.add_constraint(0.5, expr, 20.5); // expression vs double;
 		m.add_constraint(expr, var2, Solver::INFTY); // expression vs variable
 
@@ -78,11 +82,13 @@ public:
 		ASSERT_EQ(m.get_objective_value(), 10);
 	}
 
-	void test_sos1() {
-		auto var1 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
-		                           10);
-		auto var2 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
-		                            20);
+	void
+	test_sos1()
+	{
+		auto var1 =
+		    this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY, 10);
+		auto var2 =
+		    this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY, 20);
 		this->m.commit_variables();
 
 		auto obj = this->s.create_expression();
@@ -105,13 +111,16 @@ public:
 		ASSERT_EQ(m.get_objective_value(), 20);
 	}
 
-	void test_kappa_stats() {
-		if constexpr (this->s.features().template has_feature<Features::KAPPA_STATS>()) {
+	void
+	test_kappa_stats()
+	{
+		if constexpr (this->s.features()
+		                  .template has_feature<Features::KAPPA_STATS>()) {
 			/* Create Model */
 			auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
 			                           Solver::INFTY);
 			auto var2 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
-			                           Solver::INFTY);
+			                            Solver::INFTY);
 			this->m.commit_variables();
 			auto expr = this->s.create_expression();
 			expr += var;
@@ -131,11 +140,13 @@ public:
 		}
 	}
 
-	void test_setting_start() {
+	void
+	test_setting_start()
+	{
 		auto var1 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
-		                           Solver::INFTY);
+		                            Solver::INFTY);
 		auto var2 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
-		                           Solver::INFTY);
+		                            Solver::INFTY);
 		this->m.commit_variables();
 
 		m.add_constraint(0, var1, 10);
@@ -155,9 +166,11 @@ public:
 		ASSERT_EQ(m.get_objective_value(), 30);
 	}
 
-	void test_changing_var_bounds() {
-		auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
-		                            10);
+	void
+	test_changing_var_bounds()
+	{
+		auto var =
+		    this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY, 10);
 		this->m.commit_variables();
 
 		auto obj = this->s.create_expression();
@@ -172,7 +185,9 @@ public:
 		ASSERT_EQ(m.get_objective_value(), 20);
 	}
 
-	void test_changing_constr_bounds() {
+	void
+	test_changing_constr_bounds()
+	{
 		auto var1 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
 		                            Solver::INFTY);
 		auto var2 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
@@ -196,9 +211,11 @@ public:
 		ASSERT_EQ(m.get_objective_value(), 50);
 	}
 
-	void test_changing_obj_coeff() {
-		auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
-		                           10);
+	void
+	test_changing_obj_coeff()
+	{
+		auto var =
+		    this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY, 10);
 		this->m.commit_variables();
 
 		auto obj = this->s.create_expression();
@@ -217,77 +234,85 @@ public:
 	virtual ~BasicTest() {}
 
 private:
-
 	std::vector<Variable> vars;
 	std::vector<Expression> exprs;
 	Solver s;
 	Model m;
 };
 
-TEST(BasicTest, test_minimal) {
+TEST(BasicTest, test_minimal)
+{
 	BasicTest<GurobiInterface> test_grb;
 	test_grb.test_minimal();
 	BasicTest<CPLEXInterface> test_cplex;
 	test_cplex.test_minimal();
 }
 
-TEST(BasicTest, test_sos1) {
-BasicTest<GurobiInterface> test_grb;
-test_grb.test_sos1();
-BasicTest<CPLEXInterface> test_cplex;
-test_cplex.test_sos1();
+TEST(BasicTest, test_sos1)
+{
+	BasicTest<GurobiInterface> test_grb;
+	test_grb.test_sos1();
+	BasicTest<CPLEXInterface> test_cplex;
+	test_cplex.test_sos1();
 }
 
-TEST(BasicTest, test_math_ops) {
-BasicTest<GurobiInterface> test_grb;
-test_grb.test_math_ops();
-BasicTest<CPLEXInterface> test_cplex;
-test_cplex.test_math_ops();
+TEST(BasicTest, test_math_ops)
+{
+	BasicTest<GurobiInterface> test_grb;
+	test_grb.test_math_ops();
+	BasicTest<CPLEXInterface> test_cplex;
+	test_cplex.test_math_ops();
 }
 
-TEST(BasicTest, test_kappa_stats) {
-BasicTest<GurobiInterface> test_grb;
-test_grb.test_kappa_stats();
-BasicTest<CPLEXInterface> test_cplex;
-test_cplex.test_kappa_stats();
+TEST(BasicTest, test_kappa_stats)
+{
+	BasicTest<GurobiInterface> test_grb;
+	test_grb.test_kappa_stats();
+	BasicTest<CPLEXInterface> test_cplex;
+	test_cplex.test_kappa_stats();
 }
 
-TEST(BasicTest, test_write) {
-BasicTest<GurobiInterface> test_grb;
-test_grb.test_write("grb");
-BasicTest<CPLEXInterface> test_cplex;
-test_cplex.test_write("cplex");
+TEST(BasicTest, test_write)
+{
+	BasicTest<GurobiInterface> test_grb;
+	test_grb.test_write("grb");
+	BasicTest<CPLEXInterface> test_cplex;
+	test_cplex.test_write("cplex");
 }
 
-TEST(BasicTest, test_setting_start) {
-BasicTest<GurobiInterface> test_grb;
-test_grb.test_setting_start();
-BasicTest<CPLEXInterface> test_cplex;
-test_cplex.test_setting_start();
+TEST(BasicTest, test_setting_start)
+{
+	BasicTest<GurobiInterface> test_grb;
+	test_grb.test_setting_start();
+	BasicTest<CPLEXInterface> test_cplex;
+	test_cplex.test_setting_start();
 }
 
-TEST(BasicTest, test_changing_var_bounds) {
-BasicTest<GurobiInterface> test_grb;
-test_grb.test_changing_var_bounds();
-BasicTest<CPLEXInterface> test_cplex;
-test_cplex.test_changing_var_bounds();
+TEST(BasicTest, test_changing_var_bounds)
+{
+	BasicTest<GurobiInterface> test_grb;
+	test_grb.test_changing_var_bounds();
+	BasicTest<CPLEXInterface> test_cplex;
+	test_cplex.test_changing_var_bounds();
 }
 
-TEST(BasicTest, test_changing_constr_bounds) {
-BasicTest<GurobiInterface> test_grb;
-test_grb.test_changing_constr_bounds();
-BasicTest<CPLEXInterface> test_cplex;
-test_cplex.test_changing_constr_bounds();
+TEST(BasicTest, test_changing_constr_bounds)
+{
+	BasicTest<GurobiInterface> test_grb;
+	test_grb.test_changing_constr_bounds();
+	BasicTest<CPLEXInterface> test_cplex;
+	test_cplex.test_changing_constr_bounds();
 }
 
-TEST(BasicTest, test_changing_obj_coeff) {
-BasicTest<GurobiInterface> test_grb;
-test_grb.test_changing_obj_coeff();
-BasicTest<CPLEXInterface> test_cplex;
-test_cplex.test_changing_obj_coeff();
+TEST(BasicTest, test_changing_obj_coeff)
+{
+	BasicTest<GurobiInterface> test_grb;
+	test_grb.test_changing_obj_coeff();
+	BasicTest<CPLEXInterface> test_cplex;
+	test_cplex.test_changing_obj_coeff();
 }
 
-}
-}
+} // namespace testing
+} // namespace ilpabstraction
 
-#endif //ILP_ABSTRACTION_BASIC_HPP
+#endif // ILP_ABSTRACTION_BASIC_HPP
