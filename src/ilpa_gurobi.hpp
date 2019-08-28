@@ -111,8 +111,8 @@ public:
 		KappaStats kappa_stats() noexcept;
 		*/
 
-		void write_iis(std::string filename);
-		
+		inline void write_iis(std::string filename);
+
 	private:
 		inline Model(GurobiInterface * interface);
 
