@@ -1,9 +1,6 @@
-//
-// Created by lukas on 23.08.17.
-//
+#ifndef ILP_ABSTRACTION_GUROBI_CPP
+#define ILP_ABSTRACITON_GUROBI_CPP
 
-// This is actually not needed because this file will never be compiled as a compilation unit.
-// However, otherwise some "smart" IDEs don't see the declarations…
 #include "ilpa_gurobi.hpp"
 
 namespace ilpabstraction {
@@ -11,9 +8,9 @@ namespace ilpabstraction {
 namespace grb_internal {
 
 static constexpr std::pair<VariableType, char> vtype_map_data[]{
-				{VariableType::CONTINUOUS, GRB_CONTINUOUS},
-				{VariableType::BINARY,     GRB_BINARY},
-				{VariableType::INTEGER,    GRB_INTEGER},
+    {VariableType::CONTINUOUS, GRB_CONTINUOUS},
+    {VariableType::BINARY, GRB_BINARY},
+    {VariableType::INTEGER, GRB_INTEGER},
 };
 
 inline static constexpr char
@@ -47,10 +44,10 @@ get_value<GurobiInterface::DummyValType>(GurobiInterface::DummyValType val)
 }
 
 template <class T>
-class DVComparator
-{
+class DVComparator {
 public:
-	inline static bool compare(const GurobiInterface::DummyValType &lhs, const T &rhs)
+	inline static bool
+	compare(const GurobiInterface::DummyValType & lhs, const T & rhs)
 	{
 		// This is only used to compare 'other' types to a DummyValType
 		(void)lhs;
@@ -60,11 +57,11 @@ public:
 };
 
 template <>
-class DVComparator<GurobiInterface::DummyValType>
-{
+class DVComparator<GurobiInterface::DummyValType> {
 public:
-	inline static bool compare(const GurobiInterface::DummyValType &lhs,
-	                           const GurobiInterface::DummyValType &rhs)
+	inline static bool
+	compare(const GurobiInterface::DummyValType & lhs,
+	        const GurobiInterface::DummyValType & rhs)
 	{
 		return lhs == rhs;
 	}
@@ -75,41 +72,42 @@ void
 set_param_on_env(GRBEnv env, ParamType type, T val)
 {
 	switch (type) {
-		case ParamType::LOG_TO_CONSOLE:
-			env.set(GRB_IntParam_LogToConsole, val);
-			break;
-		case ParamType::TIME_LIMIT:
-			env.set(GRB_DoubleParam_TimeLimit, val);
-			break;
-		case ParamType::SEED:
-			env.set(GRB_IntParam_Seed, val);
-			break;
-		case ParamType::THREADS:
-			env.set(GRB_IntParam_Threads, val);
-			break;
-		case ParamType::MIP_FOCUS:
-			assert(false);
-			break;
-		case ParamType::NODE_FILE_DIR:
-			assert(false);
-			break;
-		case ParamType::NODE_FILE_START:
-			env.set(GRB_DoubleParam_NodefileStart, val ); // in GB
-			break;
-		default:
-			assert(false);
+	case ParamType::LOG_TO_CONSOLE:
+		env.set(GRB_IntParam_LogToConsole, val);
+		break;
+	case ParamType::TIME_LIMIT:
+		env.set(GRB_DoubleParam_TimeLimit, val);
+		break;
+	case ParamType::SEED:
+		env.set(GRB_IntParam_Seed, val);
+		break;
+	case ParamType::THREADS:
+		env.set(GRB_IntParam_Threads, val);
+		break;
+	case ParamType::MIP_FOCUS:
+		assert(false);
+		break;
+	case ParamType::NODE_FILE_DIR:
+		assert(false);
+		break;
+	case ParamType::NODE_FILE_START:
+		env.set(GRB_DoubleParam_NodefileStart, val); // in GB
+		break;
+	default:
+		assert(false);
 	}
 }
 
-template<>
+template <>
 inline void
-set_param_on_env<const char*>(GRBEnv env, ParamType type, const char* val) {
-	switch(type) {
-		case ParamType::NODE_FILE_DIR:
-			env.set(GRB_StringParam_NodefileDir, val );
-			break;
-		default:
-			assert(false);
+set_param_on_env<const char *>(GRBEnv env, ParamType type, const char * val)
+{
+	switch (type) {
+	case ParamType::NODE_FILE_DIR:
+		env.set(GRB_StringParam_NodefileDir, val);
+		break;
+	default:
+		assert(false);
 	}
 }
 
@@ -120,20 +118,20 @@ set_param_on_env<ParamMIPFocus>(GRBEnv env, ParamType type, ParamMIPFocus val)
 	assert(type == ParamType::MIP_FOCUS);
 
 	switch (val) {
-		case ParamMIPFocus::BALANCED:
-			env.set(GRB_IntParam_MIPFocus, 0);
-			break;
-		case ParamMIPFocus::OPTIMALITY:
-			env.set(GRB_IntParam_MIPFocus, 2);
-			break;
-		case ParamMIPFocus::QUALITY:
-			env.set(GRB_IntParam_MIPFocus, 1);
-			break;
-		case ParamMIPFocus::BOUND:
-			env.set(GRB_IntParam_MIPFocus, 3);
-			break;
-		default:
-			assert(false);
+	case ParamMIPFocus::BALANCED:
+		env.set(GRB_IntParam_MIPFocus, 0);
+		break;
+	case ParamMIPFocus::OPTIMALITY:
+		env.set(GRB_IntParam_MIPFocus, 2);
+		break;
+	case ParamMIPFocus::QUALITY:
+		env.set(GRB_IntParam_MIPFocus, 1);
+		break;
+	case ParamMIPFocus::BOUND:
+		env.set(GRB_IntParam_MIPFocus, 3);
+		break;
+	default:
+		assert(false);
 	}
 }
 
@@ -141,14 +139,14 @@ set_param_on_env<ParamMIPFocus>(GRBEnv env, ParamType type, ParamMIPFocus val)
 
 template <class T>
 bool
-operator==(const GurobiInterface::DummyValType &lhs, const T &rhs)
+operator==(const GurobiInterface::DummyValType & lhs, const T & rhs)
 {
 	return grb_internal::DVComparator<T>::compare(lhs, rhs);
 }
 
 template <class T>
 bool
-operator!=(const GurobiInterface::DummyValType &lhs, const T &rhs)
+operator!=(const GurobiInterface::DummyValType & lhs, const T & rhs)
 {
 	return !(lhs == rhs);
 }
@@ -176,8 +174,10 @@ GurobiInterface::Model::set_start(Variable & var, T val)
 
 template <class LowerValType, class UpperValType>
 GurobiInterface::Constraint
-GurobiInterface::Model::add_constraint(LowerValType lower_bound, Expression expr,
-                                       UpperValType upper_bound, std::string name)
+GurobiInterface::Model::add_constraint(LowerValType lower_bound,
+                                       Expression expr,
+                                       UpperValType upper_bound,
+                                       std::string name)
 {
 	std::string lower_name = "";
 	std::string upper_name = "";
@@ -188,73 +188,81 @@ GurobiInterface::Model::add_constraint(LowerValType lower_bound, Expression expr
 
 	GRBConstr lower_constr = add_lower_constraint(lower_bound, expr, lower_name);
 	GRBConstr upper_constr = add_upper_constraint(upper_bound, expr, upper_name);
-	return std::make_pair<GRBConstr, GRBConstr>(std::move(lower_constr), std::move(upper_constr));
+	return std::make_pair<GRBConstr, GRBConstr>(std::move(lower_constr),
+	                                            std::move(upper_constr));
 }
 
 void
 GurobiInterface::Model::add_sos1_constraint(const std::vector<Variable> & vars,
-                                            const std::vector<double> & weights, std::string name)
+                                            const std::vector<double> & weights,
+                                            std::string name)
 {
 	(void)name;
 
 	assert(vars.size() <= std::numeric_limits<int>::max());
 
 	if (weights.size() > 0) {
-		this->m->addSOS(vars.data(), weights.data(), (int)vars.size(), GRB_SOS_TYPE1);
+		this->m->addSOS(vars.data(), weights.data(), (int)vars.size(),
+		                GRB_SOS_TYPE1);
 	} else {
 		std::vector<double> dummy_weights;
-		for (size_t i = 0 ; i < vars.size() ; ++i) {
+		for (size_t i = 0; i < vars.size(); ++i) {
 			dummy_weights.push_back((int)i);
 		}
 
-		this->m->addSOS(vars.data(), dummy_weights.data(), (int)vars.size(), GRB_SOS_TYPE1);
+		this->m->addSOS(vars.data(), dummy_weights.data(), (int)vars.size(),
+		                GRB_SOS_TYPE1);
 	}
 }
 
 template <class UpperValType>
 void
-GurobiInterface::Model::change_constraint_ub(Constraint & constr, UpperValType upper_bound)
+GurobiInterface::Model::change_constraint_ub(Constraint & constr,
+                                             UpperValType upper_bound)
 {
 	GRBConstr grbconstr = constr.second;
 
 	auto sense = grbconstr.get(GRB_CharAttr_Sense);
 	int factor = 1;
 	switch (sense) {
-		case '<':
-			factor = 1;
-			break;
-		case '>':
-			factor = -1;
-			break;
-		default:
-			assert(false);
+	case '<':
+		factor = 1;
+		break;
+	case '>':
+		factor = -1;
+		break;
+	default:
+		assert(false);
 	}
-	grbconstr.set(GRB_DoubleAttr_RHS, factor * grb_internal::get_value(upper_bound));
+	grbconstr.set(GRB_DoubleAttr_RHS,
+	              factor * grb_internal::get_value(upper_bound));
 }
 
 void
-GurobiInterface::Model::change_objective_coefficient(Variable &var, double coefficient)
+GurobiInterface::Model::change_objective_coefficient(Variable & var,
+                                                     double coefficient)
 {
 	var.set(GRB_DoubleAttr_Obj, coefficient);
 }
 
 template <class LowerValType>
 void
-GurobiInterface::Model::change_constraint_lb(Constraint & constr, LowerValType lower_bound)
+GurobiInterface::Model::change_constraint_lb(Constraint & constr,
+                                             LowerValType lower_bound)
 {
 	GRBConstr grbconstr = constr.first;
 
 	auto sense = grbconstr.get(GRB_CharAttr_Sense);
 	int factor = 1;
 	switch (sense) {
-		case '<':
-			factor = -1;
-			break;
-		case '>':
-			factor = 1;
-			break;
-		default:
-			assert(false);
+	case '<':
+		factor = -1;
+		break;
+	case '>':
+		factor = 1;
+		break;
+	default:
+		assert(false);
 	}
 
 	grbconstr.set(GRB_DoubleAttr_RHS, grb_internal::get_value(lower_bound));
@@ -262,7 +270,8 @@ GurobiInterface::Model::change_constraint_lb(Constraint & constr, LowerValType l
 
 template <class LowerValType, class UpperValType>
 void
-GurobiInterface::Model::change_var_bounds(Variable & var, LowerValType lower_bound,
+GurobiInterface::Model::change_var_bounds(Variable & var,
+                                          LowerValType lower_bound,
                                           UpperValType upper_bound)
 {
 	var.set(GRB_DoubleAttr_LB, grb_internal::get_value(lower_bound));
@@ -277,7 +286,8 @@ GurobiInterface::Model::add_var(VariableType type, LowerValType lower_bound,
 	double lower = grb_internal::get_value(lower_bound);
 	double upper = grb_internal::get_value(upper_bound);
 
-	Variable var = this->m->addVar(lower, upper, 0, grb_internal::vtype_map(type), name);
+	Variable var =
+	    this->m->addVar(lower, upper, 0, grb_internal::vtype_map(type), name);
 
 	if (this->interface->auto_commit_variables) {
 		this->commit_variables();
@@ -298,7 +308,6 @@ GurobiInterface::Model::write_solution(const std::string & filename)
 	this->m->write(filename + std::string(".sol"));
 }
 
-
 void
 GurobiInterface::Model::commit_variables()
 {
@@ -308,50 +317,58 @@ GurobiInterface::Model::commit_variables()
 void
 GurobiInterface::Model::set_objective(Expression expr, ObjectiveType type)
 {
-	auto obj_type = (type == ObjectiveType::MAXIMIZE) ? GRB_MAXIMIZE : GRB_MINIMIZE;
+	auto obj_type =
+	    (type == ObjectiveType::MAXIMIZE) ? GRB_MAXIMIZE : GRB_MINIMIZE;
 	this->m->setObjective(expr, obj_type);
 }
 
 void
+GurobiInterface::Model::write_iis(std::string filename)
+{
+	this->m->computeIIS();
+	std::string ofname = filename + std::string(".ilp");
+	this->m->write(ofname.c_str());
+}
+
+	
+void
 GurobiInterface::Model::solve()
 {
 	this->status = ModelStatus::SOLVING;
+
 	this->m->optimize();
+
 	switch (this->m->get(GRB_IntAttr_Status)) {
-		case GRB_OPTIMAL:
-			this->status = ModelStatus::OPTIMAL;
-			break;
-		case GRB_INFEASIBLE:
-			this->status = ModelStatus::INFEASIBLE;
-			break;
-		case GRB_UNBOUNDED:
-			this->status = ModelStatus::UNBOUNDED;
-			break;
-		case GRB_TIME_LIMIT:
-		case GRB_ITERATION_LIMIT:
-		case GRB_NODE_LIMIT:
-		default:
-			this->status = ModelStatus::STOPPED;
-			break;
+	case GRB_OPTIMAL:
+		this->status = ModelStatus::OPTIMAL;
+		break;
+	case GRB_INFEASIBLE:
+		this->status = ModelStatus::INFEASIBLE;
+		break;
+	case GRB_UNBOUNDED:
+		this->status = ModelStatus::UNBOUNDED;
+		break;
+	case GRB_TIME_LIMIT:
+	case GRB_ITERATION_LIMIT:
+	case GRB_NODE_LIMIT:
+	default:
+		this->status = ModelStatus::STOPPED;
+		break;
 	}
 }
 
-GurobiInterface::Model::Model(GurobiInterface *interface_in)
-				: interface(interface_in), m(new GRBModel(*interface_in->env)), status(ModelStatus::READY),
-				  cba(this)
+GurobiInterface::Model::Model(GurobiInterface * interface_in)
+    : interface(interface_in), m(new GRBModel(*interface_in->env)),
+      status(ModelStatus::READY), cba(this)
 {
 	this->m->setCallback(&this->cba);
 }
 
-GurobiInterface::Model::~Model()
-{
-	delete this->m;
-}
+GurobiInterface::Model::~Model() { delete this->m; }
 
 GurobiInterface::GurobiInterface(bool auto_commit_variables_in)
-				: Interface(auto_commit_variables_in), env(new GRBEnv())
-{
-}
+    : Interface(auto_commit_variables_in), env(new GRBEnv())
+{}
 
 GurobiInterface::Model
 GurobiInterface::create_model()
@@ -362,22 +379,22 @@ GurobiInterface::create_model()
 template <class UpperValType>
 GRBConstr
 GurobiInterface::Model::add_upper_constraint(
-				std::enable_if_t<std::is_arithmetic<UpperValType>::value> upper_bound,
-				Expression expr, std::string name)
+    std::enable_if_t<std::is_arithmetic<UpperValType>::value> upper_bound,
+    Expression expr, std::string name)
 {
 	return this->m->addConstr(upper_bound, GRB_GREATER_EQUAL, expr, name);
 }
 
 GRBConstr
-GurobiInterface::Model::add_upper_constraint(Expression upper_bound, Expression expr,
-                                             std::string name)
+GurobiInterface::Model::add_upper_constraint(Expression upper_bound,
+                                             Expression expr, std::string name)
 {
 	return this->m->addConstr(upper_bound, GRB_GREATER_EQUAL, expr, name);
 }
 
 GRBConstr
-GurobiInterface::Model::add_upper_constraint(DummyValType upper_bound, Expression expr,
-                                             std::string name)
+GurobiInterface::Model::add_upper_constraint(DummyValType upper_bound,
+                                             Expression expr, std::string name)
 {
 	(void)upper_bound;
 	(void)expr;
@@ -389,22 +406,22 @@ GurobiInterface::Model::add_upper_constraint(DummyValType upper_bound, Expressio
 template <class LowerValType>
 GRBConstr
 GurobiInterface::Model::add_lower_constraint(
-				std::enable_if_t<std::is_arithmetic<LowerValType>::value> lower_bound,
-				Expression expr, std::string name)
+    std::enable_if_t<std::is_arithmetic<LowerValType>::value> lower_bound,
+    Expression expr, std::string name)
 {
 	return this->m->addConstr(lower_bound, GRB_LESS_EQUAL, expr, name);
 }
 
 GRBConstr
-GurobiInterface::Model::add_lower_constraint(Expression lower_bound, Expression expr,
-                                             std::string name)
+GurobiInterface::Model::add_lower_constraint(Expression lower_bound,
+                                             Expression expr, std::string name)
 {
 	return this->m->addConstr(lower_bound, GRB_LESS_EQUAL, expr, name);
 }
 
 GRBConstr
-GurobiInterface::Model::add_lower_constraint(DummyValType lower_bound, Expression expr,
-                                             std::string name)
+GurobiInterface::Model::add_lower_constraint(DummyValType lower_bound,
+                                             Expression expr, std::string name)
 {
 	(void)lower_bound;
 	(void)expr;
@@ -414,7 +431,7 @@ GurobiInterface::Model::add_lower_constraint(DummyValType lower_bound, Expressio
 }
 
 double
-GurobiInterface::Model::get_variable_assignment(const Variable &var) const
+GurobiInterface::Model::get_variable_assignment(const Variable & var) const
 {
 	return var.get(GRB_DoubleAttr_X);
 }
@@ -437,8 +454,8 @@ GurobiInterface::Model::get_status() const
 	return this->status;
 }
 
-GurobiInterface::Model::CallbackAdapter::CallbackAdapter(Model *model_in)
-				: model(model_in)
+GurobiInterface::Model::CallbackAdapter::CallbackAdapter(Model * model_in)
+    : model(model_in)
 {}
 
 void
@@ -447,44 +464,44 @@ GurobiInterface::Model::CallbackAdapter::callback()
 	grb_internal::CallbackContext ctx(this);
 
 	switch (this->where) {
-		case GRB_CB_POLLING: // Polling
-			for (auto cb : this->model->cbs) {
-				cb->on_poll(ctx);
-			}
-			break;
-		case GRB_CB_PRESOLVE: // Presolve
-		case GRB_CB_SIMPLEX: // Simplex
-			break;
-		case GRB_CB_MIP: // MIP
-		{
-			for (auto cb : this->model->cbs) {
-				cb->on_poll(ctx);
-			}
-			/*
-			double obj_val = this->getDoubleInfo(GRB_CB_MIP_OBJBST);
-			double obj_bound = this->getDoubleInfo(GRB_CB_MIP_OBJBND);
+	case GRB_CB_POLLING: // Polling
+		for (auto cb : this->model->cbs) {
+			cb->on_poll(ctx);
+		}
+		break;
+	case GRB_CB_PRESOLVE: // Presolve
+	case GRB_CB_SIMPLEX:  // Simplex
+		break;
+	case GRB_CB_MIP: // MIP
+	{
+		for (auto cb : this->model->cbs) {
+			cb->on_poll(ctx);
+		}
+		/*
+		double obj_val = this->getDoubleInfo(GRB_CB_MIP_OBJBST);
+		double obj_bound = this->getDoubleInfo(GRB_CB_MIP_OBJBND);
 
-			for (auto cb : this->model->cbs) {
-				cb->on_mip(obj_val, obj_bound);
-			}
-			*/
-			break;
+		for (auto cb : this->model->cbs) {
+		  cb->on_mip(obj_val, obj_bound);
 		}
-		case GRB_CB_MIPSOL: // MIPsol
-		case GRB_CB_MIPNODE: // MIPnode
-			break;
-		case GRB_CB_MESSAGE: // Message
-		{
-			std::string msg = this->getStringInfo(GRB_CB_MSG_STRING);
-			for (auto cb : this->model->cbs) {
-				cb->on_message(ctx, msg);
-			}
-			break;
+		*/
+		break;
+	}
+	case GRB_CB_MIPSOL:  // MIPsol
+	case GRB_CB_MIPNODE: // MIPnode
+		break;
+	case GRB_CB_MESSAGE: // Message
+	{
+		std::string msg = this->getStringInfo(GRB_CB_MSG_STRING);
+		for (auto cb : this->model->cbs) {
+			cb->on_message(ctx, msg);
 		}
-		case GRB_CB_BARRIER: // Barrier
-			break;
-		default:
-			assert(false);
+		break;
+	}
+	case GRB_CB_BARRIER: // Barrier
+		break;
+	default:
+		assert(false);
 	}
 }
 
@@ -512,10 +529,24 @@ GurobiInterface::Model::has_feasible() const
 	return this->m->get(GRB_IntAttr_SolCount) > 0;
 }
 
+/*
+void
+GurobiInterface::Model::enable_kappa_statistics() noexcept
+{
+	this->collect_kappa = true;
+}
+
+KappaStats
+GurobiInterface::Model::kappa_stats() noexcept
+{
+	return {std::nullopt, std::nullopt, std::nullopt,     std::nullopt,
+	        std::nullopt, std::nullopt, this->root_kappa, this->presolved_kappa};
+}
+*/
 namespace grb_internal {
 
-CallbackContext::CallbackContext(GRBCallbackFriendshipProxy *grb_cb_in)
-				: grb_cb(grb_cb_in)
+CallbackContext::CallbackContext(GRBCallbackFriendshipProxy * grb_cb_in)
+    : grb_cb(grb_cb_in)
 {}
 
 double
@@ -553,7 +584,8 @@ CallbackContext::get_gap() const
 		return 1;
 	}
 
-	if ((this->grb_cb->where == GRB_CB_MIP) || (this->grb_cb->where == GRB_CB_MIPNODE)) {
+	if ((this->grb_cb->where == GRB_CB_MIP) ||
+	    (this->grb_cb->where == GRB_CB_MIPNODE)) {
 		double obj_val = this->get_objective_value();
 		double bound = this->get_bound();
 
@@ -602,3 +634,5 @@ CallbackContext::get_solution_count() const
 } // namespace grb_internal
 
 } // namespace ilpabstraction
+
+#endif

@@ -6,6 +6,7 @@
 #define IL_STD 1
 #include <ilcplex/ilocplex.h>
 #include <unordered_map>
+#include <string>
 
 namespace ilpabstraction {
 
@@ -116,19 +117,9 @@ public:
 
 		inline ~Model();
 
-		/* Kappa Statistics */
-		struct KappaStats
-		{
-			double stable;
-			double suspicious;
-			double unstable;
-			double illposed;
-			double kappamax;
-			double attention;
-		};
 		inline void enable_kappa_statistics();
 		inline KappaStats kappa_stats();
-
+		
 	protected:
 		class CallbackAdapter : public IloCplex::MIPInfoCallbackI {
 		public:
@@ -254,6 +245,8 @@ operator<=(const IloNumExprArg & expr, unsigned int i)
 	return expr <= (int)i;
 }
 
+#ifndef ILP_ABSTRACTION_CPLEX_CPP
 #include "ilpa_cplex.cpp"
+#endif
 
 #endif // ILP_ABSTRACTION_CPLEX_HPP

@@ -55,7 +55,7 @@ public:
 		m.write_solution(std::string("/tmp/test_") + suffix);
 	}
 
-	void
+ 	void
 	test_math_ops()
 	{
 		auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
@@ -140,6 +140,28 @@ public:
 		}
 	}
 
+	void
+	test_write_infeasible(const std::string & suffix)
+	{
+		if constexpr (this->s.features()
+		                  .template has_feature<Features::IIS>()) {
+			/* Create Model */
+			auto var = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
+			                           Solver::INFTY);
+			auto var2 = this->m.add_var(VariableType::INTEGER, Solver::NEGATIVE_INFTY,
+			                            Solver::INFTY);
+			this->m.commit_variables();
+			auto expr = this->s.create_expression();
+			expr += var;
+			m.add_constraint(20, var, 30);
+			m.add_constraint(0, var2, 10);
+			m.add_constraint(expr, var2, Solver::INFTY);
+
+			m.write_iis(std::string("/tmp/test_infeasible_") + suffix);
+		}
+	}
+
+	
 	void
 	test_setting_start()
 	{
@@ -278,6 +300,14 @@ TEST(BasicTest, test_write)
 	test_grb.test_write("grb");
 	BasicTest<CPLEXInterface> test_cplex;
 	test_cplex.test_write("cplex");
+}
+
+TEST(BasicTest, test_write_infeasible)
+{
+	BasicTest<GurobiInterface> test_grb;
+	test_grb.test_write_infeasible("grb");
+	BasicTest<CPLEXInterface> test_cplex;
+	test_cplex.test_write_infeasible("cplex");
 }
 
 TEST(BasicTest, test_setting_start)
