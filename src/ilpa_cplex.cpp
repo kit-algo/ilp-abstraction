@@ -61,6 +61,12 @@ set_param_on_cplex<const char *>(IloCplex & cplex, ParamType type,
 	case ParamType::NODE_FILE_DIR:
 		cplex.setParam(IloCplex::Param::WorkDir, val);
 		break;
+	case ParamType::LOG_TO_CONSOLE:
+	case ParamType::TIME_LIMIT:
+	case ParamType::THREADS:
+	case ParamType::MIP_FOCUS:
+	case ParamType::NODE_FILE_START:
+	case ParamType::SEED:
 	default:
 		assert(false);
 	}

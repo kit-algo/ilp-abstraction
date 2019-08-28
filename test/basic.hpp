@@ -129,7 +129,6 @@ public:
 			m.add_constraint(0u, expr, 20u);
 			m.add_constraint(0.5, expr, 20.5);
 			m.add_constraint(expr, var2, Solver::INFTY);
-			auto obj = this->s.create_expression();
 
 			m.enable_kappa_statistics();
 

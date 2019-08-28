@@ -106,6 +106,12 @@ set_param_on_env<const char *>(GRBEnv env, ParamType type, const char * val)
 	case ParamType::NODE_FILE_DIR:
 		env.set(GRB_StringParam_NodefileDir, val);
 		break;
+	case ParamType::LOG_TO_CONSOLE:
+	case ParamType::TIME_LIMIT:
+	case ParamType::THREADS:
+	case ParamType::MIP_FOCUS:
+	case ParamType::NODE_FILE_START:
+	case ParamType::SEED:
 	default:
 		assert(false);
 	}
