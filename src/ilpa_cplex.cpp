@@ -512,9 +512,6 @@ CPLEXInterface::Model::CallbackAdapter::main()
 	for (auto cb : this->model->cbs) {
 		cb->on_poll(ctx);
 	}
-
-	// Insert here what your callback should do
-	std::cout << "Callback: " << ctx.get_objective_value() << '\n';
 }
 
 namespace cplex_internal {

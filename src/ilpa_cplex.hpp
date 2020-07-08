@@ -3,10 +3,12 @@
 
 #include "common.hpp"
 
+#include <limits>
+
 #define IL_STD 1
 #include <ilcplex/ilocplex.h>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
 namespace ilpabstraction {
 
@@ -119,7 +121,7 @@ public:
 
 		inline void enable_kappa_statistics();
 		inline KappaStats kappa_stats();
-		
+
 	protected:
 		class CallbackAdapter : public IloCplex::MIPInfoCallbackI {
 		public:
@@ -174,59 +176,93 @@ private:
 
 } // namespace ilpabstraction
 
-inline auto operator*(ilpabstraction::CPLEXVariable & var, unsigned int i)
+/*
+ * CPLEX thought it prudent to only define operator*
+ * between its variables and int, not unsigned int.
+ * This leads to ambiguous overloads when multiplying
+ * by unsigned int, since there are a myriad of overloads
+ * which could be converted to from unsigned it. Fix
+ * this by giving an explicit overload for this case.
+ */
+inline auto
+operator*(const IloNumVar lhs, unsigned int rhs)
+{
+	assert(rhs < static_cast<unsigned int>(std::numeric_limits<int>::max()));
+	return lhs * static_cast<int>(rhs);
+}
+
+inline auto
+operator*(unsigned int lhs, IloNumVar rhs)
+{
+	assert(lhs < static_cast<unsigned int>(std::numeric_limits<int>::max()));
+	return static_cast<int>(lhs) * rhs;
+}
+
+inline auto
+operator*(ilpabstraction::CPLEXVariable & var, unsigned int i)
 {
 	assert(i <= std::numeric_limits<int>::max());
 	return (IloNumVar)var * (int)i;
 }
-inline auto operator*(unsigned int i, ilpabstraction::CPLEXVariable & var)
+inline auto
+operator*(unsigned int i, ilpabstraction::CPLEXVariable & var)
 {
 	assert(i <= std::numeric_limits<int>::max());
 	return (IloNumVar)var * (int)i;
 }
-inline auto operator*(ilpabstraction::CPLEXVariable & var, int i)
+inline auto
+operator*(ilpabstraction::CPLEXVariable & var, int i)
 {
 	assert(i <= std::numeric_limits<int>::max());
 	return (IloNumVar)var * i;
 }
-inline auto operator*(int i, ilpabstraction::CPLEXVariable & var)
+inline auto
+operator*(int i, ilpabstraction::CPLEXVariable & var)
 {
 	return (IloNumVar)var * i;
 }
-inline auto operator*(ilpabstraction::CPLEXVariable & var, double d)
+inline auto
+operator*(ilpabstraction::CPLEXVariable & var, double d)
 {
 	return (IloNumVar)var * d;
 }
-inline auto operator*(double d, ilpabstraction::CPLEXVariable & var)
+inline auto
+operator*(double d, ilpabstraction::CPLEXVariable & var)
 {
 	return (IloNumVar)var * d;
 }
 
-inline auto operator*(unsigned int i, ilpabstraction::CPLEXExpression & expr)
+inline auto
+operator*(unsigned int i, ilpabstraction::CPLEXExpression & expr)
 {
 	assert(i <= std::numeric_limits<int>::max());
 	return (IloExpr)expr * (int)i;
 }
-inline auto operator*(ilpabstraction::CPLEXExpression & expr, unsigned int i)
+inline auto
+operator*(ilpabstraction::CPLEXExpression & expr, unsigned int i)
 {
 	assert(i <= std::numeric_limits<int>::max());
 	return (IloExpr)expr * (int)i;
 }
-inline auto operator*(double d, ilpabstraction::CPLEXExpression & expr)
+inline auto
+operator*(double d, ilpabstraction::CPLEXExpression & expr)
 {
 	return (IloExpr)expr * d;
 }
-inline auto operator*(ilpabstraction::CPLEXExpression & expr, double d)
+inline auto
+operator*(ilpabstraction::CPLEXExpression & expr, double d)
 {
 	return (IloExpr)expr * d;
 }
 
-inline auto operator*(unsigned int i, const IloNumLinExprTerm & expr)
+inline auto
+operator*(unsigned int i, const IloNumLinExprTerm & expr)
 {
 	assert(i <= std::numeric_limits<int>::max());
 	return expr * (int)i;
 }
-inline auto operator*(const IloNumLinExprTerm & expr, unsigned int i)
+inline auto
+operator*(const IloNumLinExprTerm & expr, unsigned int i)
 {
 	assert(i <= std::numeric_limits<int>::max());
 	return expr * (int)i;
