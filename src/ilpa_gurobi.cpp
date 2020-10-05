@@ -1,5 +1,5 @@
 #ifndef ILP_ABSTRACTION_GUROBI_CPP
-#define ILP_ABSTRACITON_GUROBI_CPP
+#define ILP_ABSTRACTION_GUROBI_CPP
 
 #include "ilpa_gurobi.hpp"
 
