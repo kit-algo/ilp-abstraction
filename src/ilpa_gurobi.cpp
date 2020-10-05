@@ -336,7 +336,6 @@ GurobiInterface::Model::write_iis(std::string filename)
 	this->m->write(ofname.c_str());
 }
 
-	
 void
 GurobiInterface::Model::solve()
 {
@@ -539,14 +538,14 @@ GurobiInterface::Model::has_feasible() const
 void
 GurobiInterface::Model::enable_kappa_statistics() noexcept
 {
-	this->collect_kappa = true;
+  this->collect_kappa = true;
 }
 
 KappaStats
 GurobiInterface::Model::kappa_stats() noexcept
 {
-	return {std::nullopt, std::nullopt, std::nullopt,     std::nullopt,
-	        std::nullopt, std::nullopt, this->root_kappa, this->presolved_kappa};
+  return {std::nullopt, std::nullopt, std::nullopt,     std::nullopt,
+          std::nullopt, std::nullopt, this->root_kappa, this->presolved_kappa};
 }
 */
 namespace grb_internal {
